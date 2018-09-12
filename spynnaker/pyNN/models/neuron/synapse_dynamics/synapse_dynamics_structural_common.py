@@ -142,8 +142,8 @@ class SynapseDynamicsStructuralCommon(AbstractSynapseDynamicsStructural):
         self._sigma_form_lateral = sigma_form_lateral
         self._p_form_forward = p_form_forward
         self._p_form_lateral = p_form_lateral
-        self._p_elim_dep = p_elim_dep
-        self._p_elim_pot = p_elim_pot
+        self._p_elim_dep = int(p_elim_dep*0xFFFFFFFF)
+        self._p_elim_pot = int(p_elim_pot*0xFFFFFFFF)
         self._grid = np.asarray(grid, dtype=int)
         self._random_partner = random_partner
         self._connections = {}
@@ -387,9 +387,9 @@ class SynapseDynamicsStructuralCommon(AbstractSynapseDynamicsStructural):
         spec.write_value(data=self._grid[1])
 
         # write probabilities for elimination
-        spec.write_value(data=int(self._p_elim_dep * (2 ** 32 - 1)),
+        spec.write_value(data=self._p_elim_dep,
                          data_type=DataType.UINT32)
-        spec.write_value(data=int(self._p_elim_pot * (2 ** 32 - 1)),
+        spec.write_value(data=self._p_elim_pot,
                          data_type=DataType.UINT32)
 
         # write the random seed (4 words), generated randomly,
