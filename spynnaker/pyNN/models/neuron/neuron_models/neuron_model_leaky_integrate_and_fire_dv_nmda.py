@@ -13,7 +13,7 @@ V_RESET = "v_reset"
 TAU_REFRAC = "tau_refrac"
 COUNTDOWN_TO_REFRACTORY_PERIOD = "countdown_to_refactory_period"
 V_PREV = "v_prev"
-DV_DT = "dv_dt"
+V_SLOW = "v_slow"
 DV_DT_S = "dv_dt_slow"
 TAU_LP = "tau_low_pass"
 GAMMA = "gamma"
@@ -30,7 +30,7 @@ class _LIF_DV_TYPES(Enum):
     V_RESET = (2, DataType.S1615)
     TAU_REFRACT = (3, DataType.INT32)
     V_PREV = (4, DataType.S1615)
-    DV_DT = (5, DataType.S1615)
+    V_SLOW = (5, DataType.S1615)
     DV_DT_SLOW = (6, DataType.S1615)
     GAMMA = (7, DataType.S1615) # history weight for slow dV/dt
     GAMMA_COMP = (8, DataType.S1615)  # 1 - GAMMA
@@ -65,7 +65,7 @@ class NeuronModelLeakyIntegrateAndFireDvDtNMDA(NeuronModelLeakyIntegrate):
         self._data[TAU_REFRAC] = tau_refrac
         self._data[COUNTDOWN_TO_REFRACTORY_PERIOD] = 0
         self._data[V_PREV] = v_rest
-        self._data[DV_DT] = 0
+        self._data[V_SLOW] = v_rest
         self._data[DV_DT_S] = 0
         self._data[TAU_LP] = tau_low_pass
         gamma = numpy.exp(-1.0/tau_low_pass)
@@ -77,7 +77,7 @@ class NeuronModelLeakyIntegrateAndFireDvDtNMDA(NeuronModelLeakyIntegrate):
         self._my_units = {
             V_RESET: 'mV', V_PREV: 'mV', 
             TAU_REFRAC: 'ms', TAU_LP: 'ms',
-            DV_DT: 'mV/ms', DV_DT_S: 'mV/ms',
+            V_SLOW: 'mV', DV_DT_S: 'mV/ms',
             V_MAX: 'mV', V_SPIKE: 'mV',
             V_NMDA: 'mV',
         }
@@ -92,12 +92,12 @@ class NeuronModelLeakyIntegrateAndFireDvDtNMDA(NeuronModelLeakyIntegrate):
 
 
     @property
-    def dv_dt(self):
-        return self._data[DV_DT]
+    def v_slow(self):
+        return self._data[V_SLOW]
 
-    @dv_dt.setter
-    def dv_dt(self, value):
-        self._data.set_value(key=DV_DT, value=value)
+    @v_slow.setter
+    def v_slow(self, value):
+        self._data.set_value(key=V_SLOW, value=value)
 
     @property
     def dv_dt_slow(self):
@@ -212,8 +212,8 @@ class NeuronModelLeakyIntegrateAndFireDvDtNMDA(NeuronModelLeakyIntegrate):
 
             # voltage change per time step
             # REAL     dV_dt;
-            NeuronParameter(self._data[DV_DT], 
-                            _LIF_DV_TYPES.DV_DT.data_type),
+            NeuronParameter(self._data[V_SLOW],
+                            _LIF_DV_TYPES.V_SLOW.data_type),
 
             # low-pass filtered version of voltage change per time step
             # REAL     dV_dt_slow;

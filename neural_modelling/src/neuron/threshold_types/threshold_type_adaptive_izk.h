@@ -39,9 +39,9 @@ static inline bool threshold_type_is_above_threshold(state_t value,
             threshold_type->threshold_value = threshold_type->threshold_min;
         }
     }
-   // log_info("thresh %4.4k\t%4.4k\t%4.4k",
-       // threshold_type->threshold_min, threshold_type->threshold_value,
-       // threshold_type->threshold_max);
+//    log_info("thresh %4.4k\t%4.4k\t%4.4k",
+//        threshold_type->threshold_min, threshold_type->threshold_value,
+//        threshold_type->threshold_max);
 
     return did_it_spike;
 }

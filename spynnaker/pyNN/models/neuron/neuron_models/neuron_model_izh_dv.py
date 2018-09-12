@@ -8,7 +8,6 @@ from .abstract_neuron_model import AbstractNeuronModel
 from data_specification.enums import DataType
 
 from enum import Enum
-import numpy
 
 A = 'a'
 B = 'b'
@@ -18,14 +17,12 @@ V_INIT = 'v_init'
 U_INIT = 'u_init'
 I_OFFSET = 'i_offset'
 V_PREV = "v_prev"
-V_SLOW = "v_slow"
+DV_DT = "dv_dt"
 DV_DT_S = "dv_dt_slow"
 TAU_LP = "tau_low_pass"
 GAMMA = "gamma"
 GAMMA_COMP = "gamma_complement"
-V_NMDA = "v_nmda"
-V_MAX = "v_max"
-V_NMDA_THRESH = 'v_nmda_threshold'
+
 
 class _IZH_TYPES(Enum):
     A = (1, DataType.S1615)
@@ -37,14 +34,10 @@ class _IZH_TYPES(Enum):
     I_OFFSET = (7, DataType.S1615)
     THIS_H = (8, DataType.S1615)
     V_PREV = (9, DataType.S1615)
-    V_SLOW = (10, DataType.S1615)
+    DV_DT = (10, DataType.S1615)
     DV_DT_SLOW = (11, DataType.S1615)
     GAMMA = (12, DataType.S1615) # history weight for slow dV/dt
     GAMMA_COMP = (13, DataType.S1615)  # 1 - GAMMA
-    V_NMDA = (14, DataType.S1615)
-    V_MAX = (15, DataType.S1615)
-    V_NMDA_THRESH = (16, DataType.S1615)
-    V2_COUNT = (17, DataType.INT32)
 
     def __new__(cls, value, data_type, doc=""):
         # pylint: disable=protected-access
@@ -75,14 +68,14 @@ class _IZH_GLOBAL_TYPES(Enum):
         return self._data_type
 
 
-class NeuronModelIzhDvDtNMDA(AbstractNeuronModel, AbstractContainsUnits):
+class NeuronModelIzhDvDt(AbstractNeuronModel, AbstractContainsUnits):
     __slots__ = [
         "_data",
         "_n_neurons",
         "_units"]
 
     def __init__(self, n_neurons, a, b, c, d, v_init, u_init, i_offset,
-                tau_low_pass, v_nmda=0., v_max=30.1, v_nmda_thresh=1000.0):
+                tau_low_pass):
         # pylint: disable=too-many-arguments
         self._units = {
             A: "ms",
@@ -93,32 +86,26 @@ class NeuronModelIzhDvDtNMDA(AbstractNeuronModel, AbstractContainsUnits):
             U_INIT: "mV/ms",
             I_OFFSET: "nA",
             V_PREV: 'mV', 
-            TAU_LP: 'ms',
-            V_SLOW: 'mV', DV_DT_S: 'mV/ms',
-            V_MAX: 'mV',
-        }
+            TAU_REFRAC: 'ms', TAU_LP: 'ms',
+            DV_DT: 'mV/ms', DV_DT_S: 'mV/ms',
+}
 
-        v_init = c
-        u_init = b*v_init
         self._n_neurons = n_neurons
         self._data = SpynakkerRangeDictionary(size=n_neurons)
         self._data[A] = a
         self._data[B] = b
         self._data[C] = c
         self._data[D] = d
-        self._data[V_INIT] = v_init + u_init*0.4
+        self._data[V_INIT] = v_init
         self._data[U_INIT] = u_init
         self._data[I_OFFSET] = i_offset
-        self._data[V_PREV] = v_init + u_init*0.4
-        self._data[V_SLOW] = v_init + u_init*0.4
+        self._data[V_PREV] = v_init
+        self._data[DV_DT] = 0
         self._data[DV_DT_S] = 0
         self._data[TAU_LP] = tau_low_pass
         gamma = numpy.exp(-1.0/tau_low_pass)
         self._data[GAMMA] = gamma
         self._data[GAMMA_COMP] = 1. - gamma
-        self._data[V_NMDA] = v_nmda
-        self._data[V_MAX] = v_max
-        self._data[V_NMDA_THRESH] = v_nmda_thresh
 
     @property
     def a(self):
@@ -163,12 +150,12 @@ class NeuronModelIzhDvDtNMDA(AbstractNeuronModel, AbstractContainsUnits):
         self._data.set_value(key=V_PREV, value=value)
 
     @property
-    def v_slow(self):
-        return self._data[V_SLOW]
+    def dv_dt(self):
+        return self._data[DV_DT]
 
-    @v_slow.setter
-    def v_slow(self, value):
-        self._data.set_value(key=V_SLOW, value=value)
+    @dv_dt.setter
+    def dv_dt(self, value):
+        self._data.set_value(key=DV_DT, value=value)
 
     @property
     def dv_dt_slow(self):
@@ -204,29 +191,6 @@ class NeuronModelIzhDvDtNMDA(AbstractNeuronModel, AbstractContainsUnits):
     def gamma_complement(self, value):
         self._data.set_value(key=GAMMA_COMP, value=value)
 
-    @property
-    def v_nmda(self):
-        return self._data[V_NMDA]
-
-    @v_nmda.setter
-    def v_nmda(self, value):
-        self._data.set_value(key=V_NMDA, value=value)
-
-    @property
-    def v_max(self):
-        return self._data[V_MAX]
-
-    @v_max.setter
-    def v_max(self, value):
-        self._data.set_value(key=V_MAX, value=value)
-
-    @property
-    def v_nmda_thresh(self):
-        return self._data[V_NMDA_THRESH]
-
-    @v_nmda_thresh.setter
-    def v_nmda_thresh(self, value):
-        self._data.set_value(key=V_NMDA_THRESHc, value=value)
 
 
     @property
@@ -244,8 +208,6 @@ class NeuronModelIzhDvDtNMDA(AbstractNeuronModel, AbstractContainsUnits):
     @v_init.setter
     def v_init(self, v_init):
         self._data.set_value(key=V_INIT, value=v_init)
-        self._data.set_value(key=V_PREV, value=v_init)
-        self._data.set_value(key=V_SLOW, value=v_init)
 
     @property
     def u_init(self):
@@ -257,15 +219,13 @@ class NeuronModelIzhDvDtNMDA(AbstractNeuronModel, AbstractContainsUnits):
 
     def initialize_v(self, v_init):
         self._data.set_value(key=V_INIT, value=v_init)
-        self._data.set_value(key=V_PREV, value=v_init)
-        self._data.set_value(key=V_SLOW, value=v_init)
 
     def initialize_u(self, u_init):
         self._data.set_value(key=U_INIT, value=u_init)
 
     @overrides(AbstractNeuronModel.get_n_neural_parameters)
     def get_n_neural_parameters(self):
-        return 17
+        return 13
 
     @inject_items({"machine_time_step": "MachineTimeStep"})
     @overrides(AbstractNeuronModel.get_neural_parameters,
@@ -273,72 +233,55 @@ class NeuronModelIzhDvDtNMDA(AbstractNeuronModel, AbstractContainsUnits):
     def get_neural_parameters(self, machine_time_step):
         # pylint: disable=arguments-differ
         return [
-            # REAL A # 1
+            # REAL A
             NeuronParameter(self._data[A], _IZH_TYPES.A.data_type),
 
-            # REAL B # 2
+            # REAL B
             NeuronParameter(self._data[B], _IZH_TYPES.B.data_type),
 
-            # REAL C # 3
+            # REAL C
             NeuronParameter(self._data[C], _IZH_TYPES.C.data_type),
 
-            # REAL D # 4
+            # REAL D
             NeuronParameter(self._data[D], _IZH_TYPES.D.data_type),
 
-            # REAL V # 5
+            # REAL V
             NeuronParameter(self._data[V_INIT], _IZH_TYPES.V_INIT.data_type),
 
-            # REAL U # 6
+            # REAL U
             NeuronParameter(self._data[U_INIT], _IZH_TYPES.U_INIT.data_type),
 
             # offset current [nA]
-            # REAL I_offset; # 7
+            # REAL I_offset;
             NeuronParameter(self._data[I_OFFSET],
                             _IZH_TYPES.I_OFFSET.data_type),
 
             # current timestep - simple correction for threshold
-            # REAL this_h; # 8
+            # REAL this_h;
             NeuronParameter(
                 machine_time_step / 1000.0, _IZH_TYPES.THIS_H.data_type),
 
             # Voltage in previous time step
-            # REAL     V_prev; # 9
+            # REAL     V_prev;
             NeuronParameter(self._data[V_PREV],
-                            _IZH_TYPES.V_PREV.data_type),
+                            _LIF_DV_TYPES.V_PREV.data_type),
 
             # voltage change per time step
-            # REAL     dV_dt; # 10
-            NeuronParameter(self._data[V_SLOW],
-                            _IZH_TYPES.V_SLOW.data_type),
+            # REAL     dV_dt;
+            NeuronParameter(self._data[DV_DT], 
+                            _LIF_DV_TYPES.DV_DT.data_type),
 
             # low-pass filtered version of voltage change per time step
-            # REAL     dV_dt_slow; # 11
+            # REAL     dV_dt_slow;
             NeuronParameter(self._data[DV_DT_S], 
-                            _IZH_TYPES.DV_DT_SLOW.data_type),
+                            _LIF_DV_TYPES.DV_DT_SLOW.data_type),
 
             # History weight to filter dV_dt into dV_dt_slow
-            # REAL     gamma; # 12
+            # REAL     gamma;
             NeuronParameter(self._data[GAMMA], 
-                            _IZH_TYPES.GAMMA.data_type),
-            # REAL gamma_comp # 13
+                            _LIF_DV_TYPES.GAMMA.data_type),
             NeuronParameter(self._data[GAMMA_COMP], 
-                            _IZH_TYPES.GAMMA_COMP.data_type),
-
-            # REAL v_nmda # 14
-            NeuronParameter(self._data[V_NMDA],
-                            _IZH_TYPES.V_NMDA.data_type),
-
-            # REAL v_max # 15
-            NeuronParameter(self._data[V_MAX],
-                            _IZH_TYPES.V_MAX.data_type),
-
-            # REAL v_nmda_thresh # 16
-            NeuronParameter(self._data[V_NMDA_THRESH],
-                            _IZH_TYPES.V_NMDA_THRESH.data_type),
-
-            # REAL v_nmda_count # 17
-            NeuronParameter(0,
-                            _IZH_TYPES.V2_COUNT.data_type),
+                            _LIF_DV_TYPES.GAMMA_COMP.data_type),
 
         ]
 
@@ -368,9 +311,7 @@ class NeuronModelIzhDvDtNMDA(AbstractNeuronModel, AbstractContainsUnits):
         self._data[V_INIT][vertex_slice.as_slice] = neural_parameters[4]
         self._data[U_INIT][vertex_slice.as_slice] = neural_parameters[5]
         self._data[V_PREV][vertex_slice.as_slice] = neural_parameters[4]
-        self._data[V_SLOW][vertex_slice.as_slice] = neural_parameters[4]
-
-
+        
     def get_n_cpu_cycles_per_neuron(self):
 
         # A bit of a guess

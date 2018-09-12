@@ -80,7 +80,7 @@ class NeuronModelIzh(AbstractNeuronModel, AbstractContainsUnits):
         self._data[C] = c
         self._data[D] = d
         self._data[V_INIT] = v_init
-        self._data[U_INIT] = u_init
+        self._data[U_INIT] = v_init * b
         self._data[I_OFFSET] = i_offset
 
     @property

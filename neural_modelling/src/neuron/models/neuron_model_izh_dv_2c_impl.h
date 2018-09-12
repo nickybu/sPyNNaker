@@ -3,6 +3,7 @@
 
 #include "neuron_model.h"
 
+
 typedef struct neuron_t {
 
     // nominally 'fixed' parameters
@@ -24,10 +25,10 @@ typedef struct neuron_t {
     // prev step voltage
     REAL     V_prev;
 
-    //voltage change
-    REAL     dV_dt;
+    // low-pass-filtered version of voltage
+    REAL     V_slow;
 
-    // low-pass-filtered version of voltage change
+    // filtered-voltage change in time
     REAL     dV_dt_slow;
 
     // low-pass weight
@@ -35,8 +36,12 @@ typedef struct neuron_t {
     REAL     gamma_complement;
 
     REAL     V2_membrane;
-    
-    
+
+    REAL     V_max;
+
+    REAL     V2_threshold;
+
+    int32_t    V2_count;
 
 } neuron_t;
 

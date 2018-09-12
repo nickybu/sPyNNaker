@@ -2,6 +2,8 @@
 
 #include <debug.h>
 
+//#define LOG_VOLTAGES 1
+
 static global_neuron_params_pointer_t global_params;
 
 /*! \brief For linear membrane voltages, 1.5 is the correct value. However
@@ -48,32 +50,51 @@ static inline void _rk2_kernel_midpoint(REAL h, neuron_pointer_t neuron,
     REAL a = neuron->A;
     REAL b = neuron->B;
 
-    REAL pre_alph = REAL_CONST(140.0) + input_this_timestep - lastU1;
+    REAL pre_alph = REAL_CONST(140.000000) + input_this_timestep - lastU1;
     REAL alpha = pre_alph
-                 + ( REAL_CONST(5.0) + REAL_CONST(0.0400) * lastV1) * lastV1;
+         + ( REAL_CONST(5.000000) + REAL_CONST(0.040000) * lastV1) * lastV1;
     REAL eta = lastV1 + REAL_HALF(h * alpha);
 
     // could be represented as a long fract?
     REAL beta = REAL_HALF(h * (b * lastV1 - lastU1) * a);
 
     neuron->V += h * (pre_alph - beta
-                      + ( REAL_CONST(5.0) + REAL_CONST(0.0400) * eta) * eta);
+          + ( REAL_CONST(5.000000) + REAL_CONST(0.040000) * eta) * eta);
 
     neuron->U += a * h * (-lastU1 - beta + b * eta);
 }
 
+//static inline void _rk2_kernel_midpoint(REAL h, neuron_pointer_t neuron,
+//                                        REAL input_this_timestep) {
+//    REAL v2 = neuron->V*neuron->V;
+//    REAL input = REAL_CONST(140.000000) - neuron->U + input_this_timestep;
+//    neuron->V += REAL_CONST(0.500000)*(
+//                    REAL_CONST(0.040000)*v2 + \
+//                    REAL_CONST(5.000000)*neuron->V + \
+//                    input);
+//
+//    v2 = neuron->V*neuron->V;
+//    neuron->V += REAL_CONST(0.500000)*(
+//                    REAL_CONST(0.040000)*v2 + \
+//                    REAL_CONST(5.000000)*neuron->V + \
+//                    input);
+//    neuron->U += neuron->A * (neuron->B*neuron->V - neuron->U);
+//}
+
 void update_dv_dt(neuron_pointer_t neuron){
-    // voltage change this step
-    neuron->dV_dt = neuron->V - neuron->V_prev;
-    neuron->V_prev = neuron->V;
 
-    // voltage change - filtered
-    neuron->dV_dt_slow = ((neuron->dV_dt_slow)*(neuron->gamma)) + \
-                         ((neuron->dV_dt)*(neuron->gamma_complement));
+    //low-pass filter membrane voltage
+    neuron->V_slow = ((neuron->V_slow)*(neuron->gamma)) + \
+                      ((neuron->V)*(neuron->gamma_complement));
 
-   // log_info("V, dv, dvs  = %11.6k, %11.6k, %11.6k",
-           // neuron->V, neuron->dV_dt, neuron->dV_dt_slow);
+    // filtered-voltage change this step
+    neuron->dV_dt_slow = neuron->V_slow - neuron->V_prev;
+
+    //store previous filtered value
+    neuron->V_prev = neuron->V_slow;
+
 }
+
 
 
 void neuron_model_set_global_neuron_params(
@@ -96,17 +117,37 @@ state_t neuron_model_state_update(
     input_t input_this_timestep = total_exc - total_inh
                                   + external_bias + neuron->I_offset;
 
+    // todo: this should be done in an event-based manner, with a LUT
+    neuron->V2_membrane = exc_input[1] - inh_input[1];
+
+    neuron->V2_count -= 1;
+
+    if((neuron->V >= neuron->V2_threshold) || neuron->V2_count > 0){
+
+        input_this_timestep += neuron->V2_membrane;
+        neuron->V2_count = 5; //todo: make this settable from Python
+
+#if defined(LOG_VOLTAGES)
+        log_info("V2 above threshold!!! %11.6k > %11.6k",
+            neuron->V2_membrane, neuron->V2_threshold);
+#endif
+//        input_this_timestep += (neuron->V2_membrane - neuron->V2_threshold);
+    }
+
     // the best AR update so far
     _rk2_kernel_midpoint(neuron->this_h, neuron, input_this_timestep);
     neuron->this_h = global_params->machine_timestep_ms;
+    if (neuron->V > neuron->V_max){
+        neuron->V = neuron->V_max;
+    }
 
-    // todo: this should be done in an event-based manner, with a LUT
-    neuron->V2_membrane = exc_input[1] - inh_input[1];
-        
     update_dv_dt(neuron);
-    
-    // log_info("V, dvS, V2  = %11.6k, %11.6k, %11.6k",
-        // neuron->V, neuron->dV_dt_slow, neuron->V2_membrane );
+
+#if defined(LOG_VOLTAGES)
+     log_info("V, Vs, dVs, V2, I = %11.6k, %11.6k, %11.6k, %11.6k, %11.6k",
+         neuron->V, neuron->V_slow, neuron->dV_dt_slow,
+         neuron->V2_membrane, input_this_timestep );
+#endif
 
     return neuron->V;
 }
@@ -134,19 +175,22 @@ void neuron_model_print_state_variables(restrict neuron_pointer_t neuron) {
 }
 
 void neuron_model_print_parameters(restrict neuron_pointer_t neuron) {
-    log_debug("A = %11.4k ", neuron->A);
-    log_debug("B = %11.4k ", neuron->B);
-    log_debug("C = %11.4k ", neuron->C);
-    log_debug("D = %11.4k ", neuron->D);
+    log_info("A = %11.4k ", neuron->A);
+    log_info("B = %11.4k ", neuron->B);
+    log_info("C = %11.4k ", neuron->C);
+    log_info("D = %11.4k ", neuron->D);
+    log_info("V = %11.4k ", neuron->V);
+    log_info("U = %11.4k ", neuron->U);
 
-    log_debug("I = %11.4k ", neuron->I_offset);
+    log_info("I = %11.4k ", neuron->I_offset);
     
-    log_debug("V_prev = %11.4k ", neuron->V_prev);
-    log_debug("dv = %11.4k ", neuron->dV_dt);
-    log_debug("dvS = %11.4k ", neuron->dV_dt_slow);
-    log_debug("G = %11.4k ", neuron->gamma);
-    log_debug("1-G = %11.4k ", neuron->gamma_complement);
-    log_debug("V2 = %11.4k \n", neuron->V2_membrane);
-
+    log_info("V_prev = %11.4k ", neuron->V_prev);
+    log_info("V_slow = %11.4k ", neuron->V_slow);
+    log_info("dvS = %11.4k ", neuron->dV_dt_slow);
+    log_info("G = %11.4k ", neuron->gamma);
+    log_info("1-G = %11.4k ", neuron->gamma_complement);
+    log_info("V2 = %11.4k", neuron->V2_membrane);
+    log_info("V_max = %11.4k", neuron->V_max);
+    log_info("V2_threshold = %11.4k\n", neuron->V2_threshold);
     
 }

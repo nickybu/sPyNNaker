@@ -421,8 +421,16 @@ class SynapticManager(object):
         """ Get the scaling of the ring buffer to provide as much accuracy as\
             possible without too much overflow
         """
-        weight_scale_squared = weight_scale * weight_scale
+
+
         n_synapse_types = self._synapse_type.get_n_synapse_types()
+
+        # todo: have an option to fix scales be passed down from top
+        # if n_synapse_types == 4: #only for nmda-enabled thingy
+        #     return [3]*n_synapse_types
+
+        weight_scale_squared = weight_scale * weight_scale
+
         running_totals = [RunningStats() for _ in range(n_synapse_types)]
         delay_running_totals = [RunningStats() for _ in range(n_synapse_types)]
         total_weights = numpy.zeros(n_synapse_types)

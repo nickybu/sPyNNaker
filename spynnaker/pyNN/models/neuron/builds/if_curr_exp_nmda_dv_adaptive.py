@@ -28,6 +28,7 @@ class IFCurrExpDvDtAdaptiveNMDA(AbstractPopulationVertex):
         'min_thresh': -50.0, 'max_thresh': -40.0,
         'up_thresh': 0.1, 'down_thresh': 0.01,
         'v_max': None, 'v_spike': -30.0
+
     }
 
     initialize_parameters = {'v_init': None}
@@ -68,11 +69,11 @@ class IFCurrExpDvDtAdaptiveNMDA(AbstractPopulationVertex):
             v_spike = max_thresh + 1.
 
         neuron_model = NeuronModelLeakyIntegrateAndFireDvDtNMDA(
-                        n_neurons, v_init, v_rest, tau_m, cm, i_offset,
-                        v_reset, tau_refrac, tau_low_pass, v_max, v_spike)
+            n_neurons, v_init, v_rest, tau_m, cm, i_offset,
+            v_reset, tau_refrac, tau_low_pass, v_max, v_spike)
         synapse_type = SynapseTypeExponentialNMDA(
-                        n_neurons, tau_syn_E, tau_syn_I, tau_syn_nmda_E, tau_syn_nmda_I,
-                        isyn_exc, isyn_inh, isyn_nmda_exc, isyn_nmda_inh)
+            n_neurons, tau_syn_E, tau_syn_I, tau_syn_nmda_E, tau_syn_nmda_I,
+            isyn_exc, isyn_inh, isyn_nmda_exc, isyn_nmda_inh)
         input_type = InputTypeCurrent()
         threshold_type = ThresholdTypeAdaptive(n_neurons, v_thresh,
                             min_thresh, max_thresh, up_thresh, down_thresh)

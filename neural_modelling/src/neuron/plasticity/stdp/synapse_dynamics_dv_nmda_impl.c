@@ -46,11 +46,11 @@ static inline final_state_t _plasticity_update_synapse(
     neuron_pointer_t post_neuron = &neuron_array_plasticity[post_index];
     
     //'convert' to uint32 so we don't have to change the definition of ..._apply_...
-    uint32_t dv_slow = (uint32_t)(*((uint32_t *)&post_neuron->dV_dt_slow));
-    uint32_t nmda = (uint32_t)(*((uint32_t *)&post_neuron->V2_membrane));
+    uint32_t dv_slow = (uint32_t)(*((uint32_t *)(&(post_neuron->dV_dt_slow))));
+    uint32_t nmda = (uint32_t)(*((uint32_t *)(&(post_neuron->V2_membrane))));
 
-   // io_printf(IO_BUF, "DW for neuron, t, dw = %012d;%05d;%11.6k\n",
-           // time, post_index, post_neuron->dV_dt_slow);
+//    io_printf(IO_BUF, "DW for neuron, t, id, dw = %012d;%05d;%11.6k\n",
+//            time, post_index, post_neuron->dV_dt_slow);
 
     current_state = timing_apply_pre_spike(time, (pre_trace_t){}, 
                     nmda, // changed from last pre time
@@ -58,6 +58,8 @@ static inline final_state_t _plasticity_update_synapse(
                     dv_slow, // changed from last post time
                     (post_trace_t){},
                     current_state);
+
+//    current_state -= 1;
     // Return final synaptic word and weight
     return synapse_structure_get_final_state(current_state);
 }
@@ -189,12 +191,12 @@ bool synapse_dynamics_process_plastic_synapses(
         // **NOTE** Dave suspects that this could be a potential location
         // for overflow
         uint32_t accumulation = ring_buffers[ring_buffer_index] +
-        		synapse_structure_get_final_weight(final_state);
+                                synapse_structure_get_final_weight(final_state);
 
         uint32_t sat_test = accumulation & 0x10000;
         if (sat_test){
-        	accumulation = sat_test - 1;
-        	plastic_saturation_count += 1;
+            accumulation = sat_test - 1;
+            plastic_saturation_count += 1;
         }
 
         ring_buffers[ring_buffer_index] = accumulation;
@@ -244,10 +246,11 @@ void synapse_dynamics_print_plastic_synapses(
     use(fixed_region_address);
     use(ring_buffer_to_input_buffer_left_shifts);
     
-#if LOG_LEVEL >= LOG_DEBUG
+//#if LOG_LEVEL >= LOG_DEBUG
 
     // Extract separate arrays of weights (from plastic region),
     // Control words (from fixed region) and number of plastic synapses
+    log_info("plastic region address: 0x%08x", plastic_region_address);
     weight_t *plastic_words = _plastic_synapses(plastic_region_address);
     const control_t *control_words = synapse_row_plastic_controls(
         fixed_region_address);
@@ -256,7 +259,7 @@ void synapse_dynamics_print_plastic_synapses(
     const pre_event_history_t *event_history = _plastic_event_history(
         plastic_region_address);
 
-    log_debug(
+    log_info(
         "Plastic region %u synapses pre-synaptic event buffer count:%u:\n",
         plastic_synapse, event_history->count_minus_one + 1);
 
@@ -268,10 +271,10 @@ void synapse_dynamics_print_plastic_synapses(
         uint32_t control_word = *control_words++;
         uint32_t synapse_type = synapse_row_sparse_type(control_word,_synapse_type_index_mask);
 
-        log_debug("%08x [%3d: (w: %5u (=", control_word, i, weight);
+        log_info("%08x [%3d: (w: %5u (=", control_word, i, weight);
         synapses_print_weight(
             weight, ring_buffer_to_input_buffer_left_shifts[synapse_type]);
-        log_debug("nA) d: %2u, %s, n = %3u)] - {%08x %08x}\n",
+        io_printf(IO_BUF,"nA) d: %2u, %s, n = %3u)] - {%08x %08x}\n",
                   synapse_row_sparse_delay(control_word, _synapse_type_index_bits),
                   synapse_types_get_type_char(synapse_row_sparse_type(
                                              control_word,_synapse_type_index_mask)),
@@ -279,7 +282,7 @@ void synapse_dynamics_print_plastic_synapses(
                   SYNAPSE_DELAY_MASK,
                   _synapse_type_index_bits);
     }
-#endif // LOG_LEVEL >= LOG_DEBUG
+//#endif // LOG_LEVEL >= LOG_DEBUG
 }
 
 //! \brief returns the counters for plastic pre synaptic events based

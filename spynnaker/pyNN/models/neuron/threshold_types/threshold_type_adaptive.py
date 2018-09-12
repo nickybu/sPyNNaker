@@ -124,12 +124,12 @@ class ThresholdTypeAdaptive(AbstractThresholdType, AbstractContainsUnits):
 
     @overrides(AbstractThresholdType.get_threshold_parameter_types)
     def get_threshold_parameter_types(self):
-        return [item.data_type for item in _STATIC_TYPES]
+        return [item.data_type for item in _ADAPTIVE_TYPES]
 
     @overrides(AbstractThresholdType.get_n_cpu_cycles_per_neuron)
     def get_n_cpu_cycles_per_neuron(self):
         # Just a comparison, but 2 just in case!
-        return 5
+        return 6
 
     @overrides(AbstractContainsUnits.get_units)
     def get_units(self, variable):

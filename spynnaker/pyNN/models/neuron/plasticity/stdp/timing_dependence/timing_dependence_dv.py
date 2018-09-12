@@ -28,6 +28,8 @@ class TimingDependenceDvDt(AbstractTimingDependence):
         if not isinstance(timing_dependence, TimingDependenceDvDt):
             return False
 
+        return True
+
     @property
     def vertex_executable_suffix(self):
         return ""

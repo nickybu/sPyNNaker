@@ -40,12 +40,12 @@ static uint32_t synapse_type_index_mask;
 
 static inline void _print_synaptic_row(synaptic_row_t synaptic_row) {
 #if LOG_LEVEL >= LOG_DEBUG
-    log_debug("Synaptic row, at address %08x Num plastic words:%u\n",
-              (uint32_t )synaptic_row, synapse_row_plastic_size(synaptic_row));
+//    log_info("Synaptic row, at address %08x Num plastic words:%u\n",
+//              (uint32_t )synaptic_row, synapse_row_plastic_size(synaptic_row));
     if (synaptic_row == NULL) {
         return;
     }
-    log_debug("----------------------------------------\n");
+//    log_info("----------------------------------------\n");
 
     // Get details of fixed region
     address_t fixed_region_address = synapse_row_fixed_region(synaptic_row);
@@ -53,19 +53,20 @@ static inline void _print_synaptic_row(synaptic_row_t synaptic_row) {
         fixed_region_address);
     size_t n_fixed_synapses = synapse_row_num_fixed_synapses(
         fixed_region_address);
-    log_debug("Fixed region %u fixed synapses (%u plastic control words):\n",
+    log_info("Fixed region %u fixed synapses (%u plastic control words):\n",
               n_fixed_synapses,
               synapse_row_num_plastic_controls(fixed_region_address));
 
     for (uint32_t i = 0; i < n_fixed_synapses; i++) {
         uint32_t synapse = fixed_synapses[i];
-        uint32_t synapse_type = synapse_row_sparse_type(synapse);
+        uint32_t synapse_type = synapse_row_sparse_type(
+                                                synapse, synapse_index_bits);
 
-        log_debug("%08x [%3d: (w: %5u (=", synapse, i,
+        log_info("%08x [%3d: (w: %5u (=", synapse, i,
                   synapse_row_sparse_weight(synapse));
         synapses_print_weight(synapse_row_sparse_weight(synapse),
                               ring_buffer_to_input_left_shifts[synapse_type]);
-        log_debug(
+        log_info(
             "nA) d: %2u, %s, n = %3u)] - {%08x %08x}\n",
             synapse_row_sparse_delay(synapse, synapse_type_index_bits),
             synapse_types_get_type_char(
@@ -76,7 +77,7 @@ static inline void _print_synaptic_row(synaptic_row_t synaptic_row) {
 
     // If there's a plastic region
     if (synapse_row_plastic_size(synaptic_row) > 0) {
-        log_debug("----------------------------------------\n");
+//        log_info("----------------------------------------\n");
         address_t plastic_region_address =
             synapse_row_plastic_region(synaptic_row);
         synapse_dynamics_print_plastic_synapses(
@@ -84,7 +85,7 @@ static inline void _print_synaptic_row(synaptic_row_t synaptic_row) {
             ring_buffer_to_input_left_shifts);
     }
 
-    log_debug("----------------------------------------\n");
+//    log_info("----------------------------------------\n");
 #else
     use(synaptic_row);
 #endif // LOG_LEVEL >= LOG_DEBUG
@@ -209,11 +210,11 @@ static inline void _print_synapse_parameters() {
 //! only if the models are compiled in debug mode will this method contain
 //! said lines.
 #if LOG_LEVEL >= LOG_DEBUG
-    log_debug("-------------------------------------\n");
+    log_info("-------------------------------------\n");
     for (index_t n = 0; n < n_neurons; n++) {
         synapse_types_print_parameters(&(neuron_synapse_shaping_params[n]));
     }
-    log_debug("-------------------------------------\n");
+    log_info("-------------------------------------\n");
 #endif // LOG_LEVEL >= LOG_DEBUG
 }
 
@@ -227,12 +228,12 @@ bool synapses_initialise(
         address_t *indirect_synapses_address,
         address_t *direct_synapses_address) {
 
-    log_debug("synapses_initialise: starting");
+    log_info("synapses_initialise: starting");
     n_neurons = n_neurons_value;
 
     // Get the synapse shaping data
     if (sizeof(synapse_param_t) > 0) {
-        log_debug("\tCopying %u synapse type parameters of size %u",
+        log_info("\tCopying %u synapse type parameters of size %u",
                 n_neurons, sizeof(synapse_param_t));
 
         // Allocate block of memory for this synapse type'synapse_index
@@ -247,7 +248,7 @@ bool synapses_initialise(
             return false;
         }
 
-        log_debug(
+        log_info(
             "\tCopying %u bytes from %u", n_neurons * sizeof(synapse_param_t),
             synapse_params_address +
             ((n_neurons * sizeof(synapse_param_t)) / 4));
@@ -273,10 +274,10 @@ bool synapses_initialise(
     // Work out the positions of the direct and indirect synaptic matrices
     // and copy the direct matrix to DTCM
     uint32_t direct_matrix_offset = (synaptic_matrix_address[0] >> 2) + 1;
-    log_debug("Indirect matrix is %u words in size", direct_matrix_offset - 1);
+    log_info("Indirect matrix is %u words in size", direct_matrix_offset - 1);
     uint32_t direct_matrix_size =
         synaptic_matrix_address[direct_matrix_offset];
-    log_debug("Direct matrix malloc size is %d", direct_matrix_size);
+    log_info("Direct matrix malloc size is %d", direct_matrix_size);
 
     if (direct_matrix_size != 0) {
         *direct_synapses_address = (address_t)
@@ -286,7 +287,7 @@ bool synapses_initialise(
             log_error("Not enough memory to allocate direct matrix");
             return false;
         }
-        log_debug(
+        log_info(
             "Copying %u bytes of direct synapses to 0x%08x",
             direct_matrix_size, *direct_synapses_address);
         spin1_memcpy(
@@ -324,7 +325,7 @@ bool synapses_initialise(
     synapse_index_bits = log_n_neurons;
     synapse_index_mask = (1 << synapse_index_bits) - 1;
 
-    log_debug("synapses_initialise: completed successfully");
+    log_info("synapses_initialise: completed successfully");
 
     return true;
 }

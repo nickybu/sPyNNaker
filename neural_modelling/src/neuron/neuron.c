@@ -151,14 +151,14 @@ static inline void _print_neuron_parameters() {
 
 //! only if the models are compiled in debug mode will this method contain
 //! said lines.
-#if LOG_LEVEL >= LOG_DEBUG
+//#if LOG_LEVEL >= LOG_DEBUG
     log_debug("-------------------------------------\n");
     for (index_t n = 0; n < n_neurons; n++) {
         neuron_model_print_parameters(&(neuron_array[n]));
     }
     log_debug("-------------------------------------\n");
     //}
-#endif // LOG_LEVEL >= LOG_DEBUG
+//#endif // LOG_LEVEL >= LOG_DEBUG
 }
 
 
@@ -286,7 +286,7 @@ bool neuron_reload_neuron_parameters(address_t address){
 //! \return True is the initialisation was successful, otherwise False
 bool neuron_initialise(address_t address, uint32_t recording_flags_param,
         uint32_t *n_neurons_value, uint32_t *incoming_spike_buffer_size) {
-    log_debug("neuron_initialise: starting");
+    log_info("neuron_initialise: starting");
 
     random_backoff = address[RANDOM_BACKOFF];
     time_between_spikes = address[TIME_BETWEEN_SPIKES] * sv->cpu_clk;
@@ -315,7 +315,7 @@ bool neuron_initialise(address_t address, uint32_t recording_flags_param,
     *incoming_spike_buffer_size = address[INCOMING_SPIKE_BUFFER_SIZE];
 
     // log message for debug purposes
-    log_debug(
+    log_info(
         "\t neurons = %u, spike buffer size = %u, params size = %u,"
         "input type size = %u, threshold size = %u", n_neurons,
         *incoming_spike_buffer_size, sizeof(neuron_t),

@@ -26,14 +26,16 @@ address_t weight_initialise(address_t address,
         plasticity_weight_region_data[s].scale = *plasticity_word++;
         plasticity_weight_region_data[s].boost = *plasticity_word++;
         plasticity_weight_region_data[s].boost_thresh = *plasticity_word++;
-
+        plasticity_weight_region_data[s].causal = *plasticity_word++;
         log_info(
-        "\tSynapse type %u: MinW:%d MaxW:%d scale:%d boost:%d bthr:%d",
+        "\tSynapse type %u: MinW:%d MaxW:%d "
+        "scale:%d boost:%d bthr:%d causal? %d",
         s, plasticity_weight_region_data[s].min_weight,
         plasticity_weight_region_data[s].max_weight,
         plasticity_weight_region_data[s].scale,
         plasticity_weight_region_data[s].boost,
-        plasticity_weight_region_data[s].boost_thresh);
+        plasticity_weight_region_data[s].boost_thresh,
+        plasticity_weight_region_data[s].causal);
     }
     log_info("weight_initialise: completed successfully");
 

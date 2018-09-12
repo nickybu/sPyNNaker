@@ -35,10 +35,10 @@ typedef struct neuron_t {
     // prev step voltage
     REAL     V_prev;
 
-    //voltage change
-    REAL     dV_dt;
+    //low-pass filtered version of voltage (Ca???)
+    REAL     V_slow;
 
-    // low-pass-filtered version of voltage change
+    // filtered-voltage change in time
     REAL     dV_dt_slow;
 
     // low-pass weight

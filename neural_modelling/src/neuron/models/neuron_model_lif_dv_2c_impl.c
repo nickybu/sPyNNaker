@@ -22,16 +22,16 @@ void neuron_model_set_global_neuron_params(
 }
 
 void update_dv_dt(neuron_pointer_t neuron){
-    // voltage change this step
-    neuron->dV_dt = neuron->V_membrane - neuron->V_prev;
-    neuron->V_prev = neuron->V_membrane;
+    //low-pass filter membrane voltage
+    neuron->V_slow = ((neuron->V_slow)*(neuron->gamma)) + \
+                      ((neuron->V_membrane)*(neuron->gamma_complement));
 
-    // voltage change - filtered
-    neuron->dV_dt_slow = ((neuron->dV_dt_slow)*(neuron->gamma)) + \
-                         ((neuron->dV_dt)*(neuron->gamma_complement));
+    // filtered-voltage change this step
+    neuron->dV_dt_slow = neuron->V_slow - neuron->V_prev;
 
-   // log_info("V, dv, dvs  = %11.6k, %11.6k, %11.6k",
-           // neuron->V_membrane, neuron->dV_dt, neuron->dV_dt_slow);
+    //store previous filtered value
+    neuron->V_prev = neuron->V_slow;
+
 }
 
 state_t neuron_model_state_update(
@@ -71,8 +71,9 @@ state_t neuron_model_state_update(
         
     update_dv_dt(neuron);
 
-    // log_info("V, dvS, V2  = %11.6k, %11.6k, %11.6k",
-        // neuron->V_membrane, neuron->dV_dt_slow, neuron->V2_membrane );
+//     log_info("V, Vs, dVs, V2  = %11.6k, %11.6k, %11.6k, %11.6k",
+//         neuron->V_membrane, neuron->V_slow, neuron->dV_dt_slow,
+//         neuron->V2_membrane );
 
     return neuron->V_membrane;
 }
@@ -94,19 +95,26 @@ state_t neuron_model_get_membrane_voltage(neuron_pointer_t neuron) {
 }
 
 void neuron_model_print_state_variables(restrict neuron_pointer_t neuron) {
-    log_debug("V membrane    = %11.4k mv", neuron->V_membrane);
+    log_info("V membrane    = %11.4k mv", neuron->V_membrane);
 }
 
 void neuron_model_print_parameters(restrict neuron_pointer_t neuron) {
-    log_debug("V reset       = %11.4k mv", neuron->V_reset);
-    log_debug("V rest        = %11.4k mv", neuron->V_rest);
+    log_info("V reset       = %11.4k mv", neuron->V_reset);
+    log_info("V rest        = %11.4k mv", neuron->V_rest);
 
-    log_debug("I offset      = %11.4k nA", neuron->I_offset);
-    log_debug("R membrane    = %11.4k Mohm", neuron->R_membrane);
+    log_info("I offset      = %11.4k nA", neuron->I_offset);
+    log_info("R membrane    = %11.4k Mohm", neuron->R_membrane);
 
-    log_debug("exp(-ms/(RC)) = %11.4k [.]", neuron->exp_TC);
+    log_info("exp(-ms/(RC)) = %11.4k [.]", neuron->exp_TC);
 
-    log_debug("T refract     = %u timesteps", neuron->T_refract);
-    log_debug("gamma = %11.4k", neuron->gamma);
-    log_debug("gamma_complement = %11.4k", neuron->gamma_complement);
+    log_info("T refract     = %u timesteps", neuron->T_refract);
+    log_info("gamma = %11.4k", neuron->gamma);
+    log_info("gamma_complement = %11.4k", neuron->gamma_complement);
+
+    log_info("V_prev = %11.4k ", neuron->V_prev);
+    log_info("V_slow = %11.4k ", neuron->V_slow);
+    log_info("dvS = %11.4k ", neuron->dV_dt_slow);
+    log_info("G = %11.4k ", neuron->gamma);
+    log_info("1-G = %11.4k ", neuron->gamma_complement);
+    log_info("V2 = %11.4k \n", neuron->V2_membrane);
 }

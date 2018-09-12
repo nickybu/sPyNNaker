@@ -75,17 +75,7 @@ static inline update_state_t timing_apply_pre_spike(
     use(&last_post_trace);
     use(&time);
 
-    // dv is in 32-bit S16.15 format, we need to change it to 16-bit S4.11 format
-//    int32_t dv = (((int32_t)dv_slow) >> 4);
-    int32_t dv = (int32_t)dv_slow;
-//    log_info("in timing_apply_pre_spike time, dv = %u, %11.6k, %d", time, dv, dv);
-//    log_info("timing_apply dv full %d", dv);
-    // dv = dv >> 4;
-//    log_info( "in timing_apply_pre_spike time, dv = %u, %d, %d %d\t%d",
-//              time, dv, (dv>>12), ((dv>>12)& ((1 << 12) -1)), (dv & ((1 << 12) -1)) );
-//    log_info("timing_apply dv half %d", dv);
-
-    return weight_dv_apply(previous_state, dv, (int32_t)nmda);
+    return weight_dv_apply(previous_state, (int32_t)dv_slow, (int32_t)nmda);
 
 }
 
