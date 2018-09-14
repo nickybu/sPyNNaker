@@ -584,13 +584,16 @@ bool synaptogenesis_dynamics_elimination_rule(void)
     // Is synaptic weight <.5 g_max? (i.e. synapse is depressed)
     uint32_t r = mars_kiss64_seed(rewiring_data.local_seed);
     int appr_scaled_weight = rewiring_data.g_max[current_state.connection_type];
-    if (current_state.sp_data.weight < (appr_scaled_weight >> 1) &&
+//    int appr_scaled_weight = rewiring_data.weight[current_state.connection_type];
+//    if (current_state.sp_data.weight < (appr_scaled_weight >> 1) &&
+    if (current_state.sp_data.weight < (appr_scaled_weight) &&
             r > rewiring_data.p_elim_dep) {
         return false;
     }
 
     // otherwise, if synapse is potentiated, use probability 2
-    if (current_state.sp_data.weight >= (appr_scaled_weight >> 1) &&
+//    if (current_state.sp_data.weight >= (appr_scaled_weight >> 1) &&
+    if (current_state.sp_data.weight >= appr_scaled_weight &&
             r > rewiring_data.p_elim_pot) {
         return false;
     }
@@ -637,10 +640,12 @@ bool synaptogenesis_dynamics_formation_rule(void)
 //        probability = rewiring_data.lat_probabilities[current_state.distance];
 //    }
     u032 r = ulrbits(mars_kiss64_seed(rewiring_data.local_seed));
-    if (r > rewiring_data.p_form) {
+    if (r > rewiring_data.p_form ) {
         return false;
     }
     int appr_scaled_weight = rewiring_data.weight[current_state.connection_type];
+//    int diff = rewiring_data.weight[current_state.connection_type] - rewiring_data.g_max[current_state.connection_type];
+//    int appr_scaled_weight = rewiring_data.g_max[current_state.connection_type]+diff*ulrbits(mars_kiss64_seed(rewiring_data.local_seed));
 
     if (!add_neuron(current_state.post_syn_id, rewiring_dma_buffer.row,
             appr_scaled_weight, rewiring_data.delay,
