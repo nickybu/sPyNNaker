@@ -74,6 +74,9 @@ static inline final_state_t _plasticity_update_synapse(
     // Apply axonal delay to time of last presynaptic spike
     const uint32_t delayed_last_pre_time = last_pre_time + delay_axonal;
 
+//    log_info("delay axonal: %d",delay_axonal);
+//    log_info("delay dendritic: %d",delay_dendritic);
+
     // Get the post-synaptic window of events to be processed
     const uint32_t window_begin_time = (delayed_last_pre_time >=
         delay_dendritic) ? (delayed_last_pre_time - delay_dendritic) : 0;
@@ -90,6 +93,8 @@ static inline final_state_t _plasticity_update_synapse(
     while (post_window.num_events > 0) {
         const uint32_t delayed_post_time = *post_window.next_time
                                            + delay_dendritic;
+//                                           - delay_dendritic;
+//                                            +0;
         log_debug("\t\tApplying post-synaptic event at delayed time:%u\n",
               delayed_post_time);
 

@@ -82,8 +82,12 @@ static inline weight_state_t weight_one_term_apply_potentiation(
 //---------------------------------------
 static inline weight_t weight_get_final(weight_state_t new_state) {
     log_debug("\tnew_weight:%d\n", new_state.weight);
+        // Clamp new weight
+    int32_t new_weight = MIN(new_state.weight_region->max_weight,
+                     MAX(new_state.weight, new_state.weight_region->min_weight));
 
-    return (weight_t) new_state.weight;
+//    return (weight_t) new_state.weight;
+    return (weight_t) new_weight;
 }
 
 #endif  // _WEIGHT_MULTIPLICATIVE_IMPL_H_

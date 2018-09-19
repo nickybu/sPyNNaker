@@ -72,6 +72,9 @@ class TimingDependenceVogels2011(AbstractTimingDependence):
         # Write alpha to spec
         fixed_point_alpha = plasticity_helpers.float_to_fixed(
             self._alpha, plasticity_helpers.STDP_FIXED_POINT_ONE)
+        if 0:#fixed_point_alpha == 0:
+            raise ArithmeticError("Vogels STDP alpha constant {} "
+                                  " has been scaled to 0!".format(self._alpha))
         spec.write_value(data=fixed_point_alpha, data_type=DataType.INT32)
 
         # Write lookup table

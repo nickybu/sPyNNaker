@@ -122,6 +122,8 @@ static inline update_state_t timing_apply_post_spike(
     uint32_t time_since_last_pre = time - last_pre_time;
     int32_t exponential_decay = DECAY_LOOKUP_TAU(time_since_last_pre);
     int32_t decayed_r1 = STDP_FIXED_MUL_16X16(last_pre_trace, exponential_decay);
+//    int32_t decayed_r1 = STDP_FIXED_MUL_16X16(last_pre_trace, exponential_decay)
+//    - plasticity_trace_region_data.alpha;
 
     log_debug("\t\t\ttime_since_last_pre_event=%u, decayed_r1=%d\n",
         time_since_last_pre, decayed_r1);

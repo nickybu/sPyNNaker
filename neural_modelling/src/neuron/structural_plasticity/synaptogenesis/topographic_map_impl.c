@@ -640,7 +640,8 @@ bool synaptogenesis_dynamics_formation_rule(void)
 //        probability = rewiring_data.lat_probabilities[current_state.distance];
 //    }
     u032 r = ulrbits(mars_kiss64_seed(rewiring_data.local_seed));
-    if (r > rewiring_data.p_form ) {
+//    if (r > rewiring_data.p_form || r >  0xE665) {//number of machine atoms and 0.9 probability
+    if (r > rewiring_data.p_form) {//number of machine atoms probability
         return false;
     }
     int appr_scaled_weight = rewiring_data.weight[current_state.connection_type];
