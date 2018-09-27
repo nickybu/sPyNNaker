@@ -86,6 +86,7 @@ typedef struct {
  }
 
  static inline void _add_input(bi_exp_parm* bi_exp_params, input_t input){
+
 	 bi_exp_params->a_response =  bi_exp_params->a_response + input;
 	 bi_exp_params->b_response = bi_exp_params->b_response + input;
  }
@@ -125,17 +126,52 @@ typedef struct {
  static inline input_t* synapse_types_get_excitatory_input(
  		synapse_param_pointer_t parameter) {
 
-	 excitatory_response[0] = ((parameter->ex1_str.a_A * parameter->ex1_str.a_response)
+	 // excitatory
+	 int_lk_t temp;
+
+	 temp = bitslk((parameter->ex1_str.a_A * parameter->ex1_str.a_response)
 			 + (parameter->ex1_str.b_B * parameter->ex1_str.b_response));
 
-	 excitatory_response[1] = ((parameter->ex2_str.a_A * parameter->ex2_str.a_response)
-					 + (parameter->ex2_str.b_B * parameter->ex2_str.b_response));
+	 if ((temp >> 31) & 0x10000) { // if 17th bit is set
+		 excitatory_response[0] = 0xffff;
+	 } else {
+		 excitatory_response[0] = (parameter->ex1_str.a_A * parameter->ex1_str.a_response)
+					 + (parameter->ex1_str.b_B * parameter->ex1_str.b_response);
+	 }
 
-	 excitatory_response[2] = ((parameter->ex3_str.a_A * parameter->ex3_str.a_response)
-					 + (parameter->ex3_str.b_B * parameter->ex3_str.b_response));
+	 // excitatory2
+	 temp = bitslk((parameter->ex2_str.a_A * parameter->ex2_str.a_response)
+			 + (parameter->ex2_str.b_B * parameter->ex2_str.b_response));
+	 if ((temp >> 31 & 0x10000)){
+		 excitatory_response[1] = 0xffff;
+	 } else {
+		 excitatory_response[1] = ((parameter->ex2_str.a_A * parameter->ex2_str.a_response)
+		 					 + (parameter->ex2_str.b_B * parameter->ex2_str.b_response));
+	 }
 
-	 excitatory_response[3] = ((parameter->ex4_str.a_A * parameter->ex4_str.a_response)
-					 + (parameter->ex4_str.b_B * parameter->ex4_str.b_response));
+	 // excitatory3
+	 temp = bitslk((parameter->ex3_str.a_A * parameter->ex3_str.a_response)
+				 + (parameter->ex3_str.b_B * parameter->ex3_str.b_response));
+
+	 if ((temp >> 31 & 0x10000)){
+		 excitatory_response[2] = 0xffff;
+	 } else {
+		 excitatory_response[2] = ((parameter->ex3_str.a_A * parameter->ex3_str.a_response)
+		 					 + (parameter->ex3_str.b_B * parameter->ex3_str.b_response));
+	 }
+
+
+	 // excitatory4
+	 temp = bitslk((parameter->ex4_str.a_A * parameter->ex4_str.a_response)
+			 + (parameter->ex4_str.b_B * parameter->ex4_str.b_response));
+
+	 if ((temp >> 31 & 0x10000)){
+		 excitatory_response[3] = 0xffff;
+	 } else {
+		 excitatory_response[3] = ((parameter->ex4_str.a_A * parameter->ex4_str.a_response)
+		 		 + (parameter->ex4_str.b_B * parameter->ex4_str.b_response));
+	 }
+
 
 	 return &excitatory_response[0];
  }
@@ -143,17 +179,55 @@ typedef struct {
  static inline input_t* synapse_types_get_inhibitory_input(
  		synapse_param_pointer_t parameter) {
 
-	 inhibitory_response[0] = ((parameter->inh1_str.a_A * parameter->inh1_str.a_response)
+	 int_lk_t temp;
+
+	 temp = bitslk((parameter->inh1_str.a_A * parameter->inh1_str.a_response)
 			 + (parameter->inh1_str.b_B * parameter->inh1_str.b_response));
 
-	 inhibitory_response[1] = ((parameter->inh2_str.a_A * parameter->inh2_str.a_response)
-					 + (parameter->inh2_str.b_B * parameter->inh2_str.b_response));
+	 if ((temp >> 31 & 0x10000)){
+		 inhibitory_response[0] = 0xffff;
+	 } else {
+		 inhibitory_response[0] = ((parameter->inh1_str.a_A * parameter->inh1_str.a_response)
+				 + (parameter->inh1_str.b_B * parameter->inh1_str.b_response));
+	 }
 
-	 inhibitory_response[2] = ((parameter->inh3_str.a_A * parameter->inh3_str.a_response)
-					 + (parameter->inh3_str.b_B * parameter->inh3_str.b_response));
+	 // inhibitory2
+	 temp = bitslk((parameter->inh2_str.a_A * parameter->inh2_str.a_response)
+			 + (parameter->inh2_str.b_B * parameter->inh2_str.b_response));
 
-	 inhibitory_response[3] = ((parameter->inh4_str.a_A * parameter->inh4_str.a_response)
-					 + (parameter->inh4_str.b_B * parameter->inh4_str.b_response));
+	 if ((temp >> 31 & 0x10000)){
+		 inhibitory_response[1] = 0xffff;
+	 } else {
+		 inhibitory_response[1] = ((parameter->inh2_str.a_A * parameter->inh2_str.a_response)
+		 		 + (parameter->inh2_str.b_B * parameter->inh2_str.b_response));
+	 }
+
+
+	 // inhibitory3
+	 temp = bitslk((parameter->inh3_str.a_A * parameter->inh3_str.a_response)
+			 + (parameter->inh3_str.b_B * parameter->inh3_str.b_response));
+	 if ((temp >> 31) & 0x10000) { // if 17th bit is set
+
+		 inhibitory_response[2] = 0xffff;
+		 log_info("synaptic input buffer wrapped");
+
+	 } else {
+		 inhibitory_response[2] = ((parameter->inh3_str.a_A * parameter->inh3_str.a_response)
+				 + (parameter->inh3_str.b_B * parameter->inh3_str.b_response));
+	 }
+
+	 // inhibitory4
+	 temp = bitslk((parameter->inh4_str.a_A * parameter->inh4_str.a_response)
+			 + (parameter->inh4_str.b_B * parameter->inh4_str.b_response));
+
+	 if ((temp >> 31 & 0x10000)){
+		 inhibitory_response[3] =0xffff;
+	 } else {
+		 inhibitory_response[3] = ((parameter->inh4_str.a_A * parameter->inh4_str.a_response)
+		 					 + (parameter->inh4_str.b_B * parameter->inh4_str.b_response));
+	 }
+
+
 
 	 return &inhibitory_response[0];
  }
