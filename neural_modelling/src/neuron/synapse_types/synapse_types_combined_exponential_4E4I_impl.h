@@ -209,7 +209,7 @@ typedef struct {
 	 if ((temp >> 31) & 0x10000) { // if 17th bit is set
 
 		 inhibitory_response[2] = 0xffff;
-		 log_info("synaptic input buffer wrapped");
+//		 log_info("synaptic input buffer wrapped");
 
 	 } else {
 		 inhibitory_response[2] = ((parameter->inh3_str.a_A * parameter->inh3_str.a_response)
