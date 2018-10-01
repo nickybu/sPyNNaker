@@ -50,7 +50,7 @@ class HillTononi(AbstractPopulationVertex):
     # Pacemaker
         'I_H':-0.2,
         'g_H':2.0,
-        'E_H':-40.0, # 40 in Synthesis code and 43.0 in Huguenard's paper. Was 65.0 in OR code
+        'E_H':-43.0, # 40 in Synthesis code and 43.0 in Huguenard's paper. Was 65.0 in OR code
         'm_H':4.0,
         'm_inf_H':5.0,
         'e_to_t_on_tau_m_H':6.0,

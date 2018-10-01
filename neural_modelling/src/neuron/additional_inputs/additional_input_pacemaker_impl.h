@@ -62,7 +62,7 @@ static input_t additional_input_get_input_value_as_current(
         // membrane_voltage = local_v;
         local_v = additional_input->v_clamp;
          } else {
-        local_v = -55;
+        local_v = -65;
         }
 
         membrane_voltage = local_v;

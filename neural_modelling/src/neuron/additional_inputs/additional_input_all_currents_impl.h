@@ -59,10 +59,9 @@ static input_t additional_input_get_input_value_as_current(
 	if (n_dt >= additional_input->s_clamp &&
             n_dt < additional_input->s_clamp + additional_input->t_clamp){
          // local_v +=1;
-         // membrane_voltage = local_v;
-            local_v = additional_input->v_clamp;
+           local_v = additional_input->v_clamp;
         } else {
-            local_v = -65k;
+            local_v = -65;
         }
 
         membrane_voltage = local_v;
@@ -179,12 +178,14 @@ static input_t additional_input_get_input_value_as_current(
                              - additional_input->D_infinity)
                              * additional_input->e_to_t_on_tau_m_DK;
 
-        accum D_cube = (additional_input->D-0.05) * (additional_input->D-0.05) *  (additional_input->D-0.05);
+        accum D_cube = additional_input->D * additional_input->D * additional_input->D;
+       // accum D_cube = (additional_input->D - 0.05) * (additional_input->D - 0.05)  * (additional_input->D - 0.05) ;       
+
          // the 0.05 factor above was added to compensate the difference from 3.5 to 3.0 exponent, in this way 
-         // the error is minimal. BUTVERIFY IF THIS IS STILL NEEDED.
+         // the error is minimal. BUT VERIFY IF THIS IS STILL NEEDED.
 
         additional_input->m_inf_DK = 1k / (1k + (0.0078125k /  // 0.25^3.5 = 0.0078125
-                                  (0.00001+ D_cube  // the 0.00001 factor was added to avoid divergence of the type 1/0.
+                                  (D_cube +0.00000001 // the 0.00001 factor was added to avoid divergence of the type 1/0.
                                   )));              // TODO: Actual exponent is D^3.5.
 
         additional_input->I_DK = - additional_input->g_DK
