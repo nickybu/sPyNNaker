@@ -59,6 +59,9 @@ struct matrix_generator_stdp {
      *! \brief The index of the half-word that will contain the weight
      */
     uint32_t weight_half_word;
+
+    // could add list here:
+    uint16_t stp_params[];
 };
 
 void *matrix_generator_stdp_initialize(address_t *region) {

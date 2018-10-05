@@ -391,6 +391,8 @@ class SynapseDynamicsSTDP(
             synapse_struct.get_n_half_words_per_connection(),
             synapse_struct.get_weight_half_word()], dtype="uint32")
 
+        # append stp params here
+
     @property
     @overrides(AbstractGenerateOnMachine.
                gen_matrix_params_size_in_bytes)
