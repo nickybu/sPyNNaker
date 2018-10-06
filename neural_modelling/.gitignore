@@ -1,4 +1,6 @@
 /Debug
 /.cproject
 /.project
-/.settings/language.settings.xml
+/.settings/
+*modified_src/
+*builds/
