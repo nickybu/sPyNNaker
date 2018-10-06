@@ -185,7 +185,7 @@ class IzkCurrCombExp4E4I(AbstractPyNNNeuronModelStandard):
 
         # Construct model objects
         neuron_model = NeuronModelIzh(
-            a, b, c, d, v_init, u_init, i_offset)
+            a, b, c, d, v, u, i_offset)
 
         synapse_type = SynapseTypeCombExp4E4I(
                 # excitatory

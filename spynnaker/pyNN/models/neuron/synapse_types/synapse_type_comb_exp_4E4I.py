@@ -222,79 +222,79 @@ class SynapseTypeCombExp4E4I(AbstractSynapseType):
                 inh4_b_tau
                 ):
 
-        super(SynapseTypeCombExp2E2I, self).__init__([
+        super(SynapseTypeCombExp4E4I, self).__init__([
             DataType.S1615,  # exc_a_response
             DataType.S1615,  # exc_a
             DataType.U032,   # exc_a_decay
-            DataType.U032,   # exc_a_init
+#             DataType.U032,   # exc_a_init
             DataType.S1615,  # exc_B_response
             DataType.S1615,  # exc_B
             DataType.U032,   # exc_B_decay
-            DataType.U032,   # exc_B_init
+#             DataType.U032,   # exc_B_init
 
             DataType.S1615,  # exc2_a_response
             DataType.S1615,  # exc2_a
             DataType.U032,   # exc2_a_decay
-            DataType.U032,   # exc2_a_init
+#             DataType.U032,   # exc2_a_init
             DataType.S1615,  # exc2_B_response
             DataType.S1615,  # exc2_B
             DataType.U032,   # exc2_B_decay
-            DataType.U032,   # exc2_B_init
+#             DataType.U032,   # exc2_B_init
 
             DataType.S1615,  # exc3_a_response
             DataType.S1615,  # exc3_a
             DataType.U032,   # exc3_a_decay
-            DataType.U032,   # exc3_a_init
+#             DataType.U032,   # exc3_a_init
             DataType.S1615,  # exc3_B_response
             DataType.S1615,  # exc3_B
             DataType.U032,   # exc3_B_decay
-            DataType.U032,   # exc3_B_init
+#             DataType.U032,   # exc3_B_init
 
             DataType.S1615,  # exc4_a_response
             DataType.S1615,  # exc4_a
             DataType.U032,   # exc4_a_decay
-            DataType.U032,   # exc4_a_init
+#             DataType.U032,   # exc4_a_init
             DataType.S1615,  # exc4_B_response
             DataType.S1615,  # exc4_B
             DataType.U032,   # exc4_B_decay
-            DataType.U032,   # exc4_B_init
+#             DataType.U032,   # exc4_B_init
 
             DataType.S1615,  # inh_a_response
             DataType.S1615,  # inh_a
             DataType.U032,   # inh_a_decay
-            DataType.U032,   # inh_a_init
+#             DataType.U032,   # inh_a_init
             DataType.S1615,  # inh_B_response
             DataType.S1615,  # inh_B
             DataType.U032,   # inh_B_decay
-            DataType.U032,   # inh_B_init
+#             DataType.U032,   # inh_B_init
 
             DataType.S1615,  # inh2_a_response
             DataType.S1615,  # inh2_a
             DataType.U032,   # inh2_a_decay
-            DataType.U032,   # inh2_a_init
+#             DataType.U032,   # inh2_a_init
             DataType.S1615,  # inh2_B_response
             DataType.S1615,  # inh2_B
             DataType.U032,   # inh2_B_decay
-            DataType.U032,   # inh2_B_init
+#             DataType.U032,   # inh2_B_init
 
 
             DataType.S1615,  # inh3_a_response
             DataType.S1615,  # inh3_a
             DataType.U032,   # inh3_a_decay
-            DataType.U032,   # inh3_a_init
+#             DataType.U032,   # inh3_a_init
             DataType.S1615,  # inh3_B_response
             DataType.S1615,  # inh3_B
             DataType.U032,   # inh3_B_decay
-            DataType.U032,   # inh3_B_init
+#             DataType.U032,   # inh3_B_init
 
             DataType.S1615,  # inh4_a_response
             DataType.S1615,  # inh4_a
             DataType.U032,   # inh4_a_decay
-            DataType.U032,   # inh4_a_init
+#             DataType.U032,   # inh4_a_init
             DataType.S1615,  # inh4_B_response
             DataType.S1615,  # inh4_B
             DataType.U032,   # inh4_B_decay
-            DataType.U032,   # inh4_B_init
+#             DataType.U032,   # inh4_B_init
             ])
 
 
@@ -376,7 +376,7 @@ class SynapseTypeCombExp4E4I(AbstractSynapseType):
         self._inh4_b_B = inh4_b_B
         self._inh4_b_tau = inh4_b_tau
 
-        self.inh2_a_A, self.inh2_b_B = set_excitatory_scalar(self._inh4_a_tau, self._inh4_b_tau)
+        self.inh4_a_A, self.inh4_b_B = set_excitatory_scalar(self._inh4_a_tau, self._inh4_b_tau)
 
 
 
@@ -474,81 +474,81 @@ class SynapseTypeCombExp4E4I(AbstractSynapseType):
             state_variables[EXC_A_RESPONSE],
             parameters[EXC_CONST_A],
             parameters[EXC_A_TAU].apply_operation(decay),
-            parameters[EXC_A_TAU].apply_operation(init),
+#             parameters[EXC_A_TAU].apply_operation(init),
             state_variables[EXC_B_RESPONSE],
             parameters[EXC_CONST_B],
             parameters[EXC_B_TAU].apply_operation(decay),
-            parameters[EXC_B_TAU].apply_operation(init),
+#             parameters[EXC_B_TAU].apply_operation(init),
 
             # excitatory2
             state_variables[EXC2_A_RESPONSE],
             parameters[EXC2_CONST_A],
             parameters[EXC2_A_TAU].apply_operation(decay),
-            parameters[EXC2_A_TAU].apply_operation(init),
+#             parameters[EXC2_A_TAU].apply_operation(init),
             state_variables[EXC2_B_RESPONSE],
             parameters[EXC2_CONST_B],
             parameters[EXC2_B_TAU].apply_operation(decay),
-            parameters[EXC2_B_TAU].apply_operation(init),
+#             parameters[EXC2_B_TAU].apply_operation(init),
 
             # excitatory3
             state_variables[EXC3_A_RESPONSE],
             parameters[EXC3_CONST_A],
             parameters[EXC3_A_TAU].apply_operation(decay),
-            parameters[EXC3_A_TAU].apply_operation(init),
+#             parameters[EXC3_A_TAU].apply_operation(init),
             state_variables[EXC3_B_RESPONSE],
             parameters[EXC3_CONST_B],
             parameters[EXC3_B_TAU].apply_operation(decay),
-            parameters[EXC3_B_TAU].apply_operation(init),
+#             parameters[EXC3_B_TAU].apply_operation(init),
 
             # excitatory4
             state_variables[EXC4_A_RESPONSE],
             parameters[EXC4_CONST_A],
             parameters[EXC4_A_TAU].apply_operation(decay),
-            parameters[EXC4_A_TAU].apply_operation(init),
+#             parameters[EXC4_A_TAU].apply_operation(init),
             state_variables[EXC4_B_RESPONSE],
             parameters[EXC4_CONST_B],
             parameters[EXC4_B_TAU].apply_operation(decay),
-            parameters[EXC4_B_TAU].apply_operation(init),
+#             parameters[EXC4_B_TAU].apply_operation(init),
 
             # Inhibitory
             state_variables[INH_A_RESPONSE],
             parameters[INH_CONST_A],
             parameters[INH_A_TAU].apply_operation(decay),
-            parameters[INH_A_TAU].apply_operation(init),
+#             parameters[INH_A_TAU].apply_operation(init),
             state_variables[INH_B_RESPONSE],
             parameters[INH_CONST_B],
             parameters[INH_B_TAU].apply_operation(decay),
-            parameters[INH_B_TAU].apply_operation(init),
+#             parameters[INH_B_TAU].apply_operation(init),
 
             # Inhibitory 2
             state_variables[INH2_A_RESPONSE],
             parameters[INH2_CONST_A],
             parameters[INH2_A_TAU].apply_operation(decay),
-            parameters[INH2_A_TAU].apply_operation(init),
+#             parameters[INH2_A_TAU].apply_operation(init),
             state_variables[INH2_B_RESPONSE],
             parameters[INH2_CONST_B],
             parameters[INH2_B_TAU].apply_operation(decay),
-            parameters[INH2_B_TAU].apply_operation(init),
+#             parameters[INH2_B_TAU].apply_operation(init),
 
             # Inhibitory
             state_variables[INH3_A_RESPONSE],
             parameters[INH3_CONST_A],
             parameters[INH3_A_TAU].apply_operation(decay),
-            parameters[INH3_A_TAU].apply_operation(init),
+#             parameters[INH3_A_TAU].apply_operation(init),
             state_variables[INH3_B_RESPONSE],
             parameters[INH3_CONST_B],
             parameters[INH3_B_TAU].apply_operation(decay),
-            parameters[INH3_B_TAU].apply_operation(init),
+#             parameters[INH3_B_TAU].apply_operation(init),
 
             # Inhibitory 2
             state_variables[INH4_A_RESPONSE],
             parameters[INH4_CONST_A],
             parameters[INH4_A_TAU].apply_operation(decay),
-            parameters[INH4_A_TAU].apply_operation(init),
+#             parameters[INH4_A_TAU].apply_operation(init),
             state_variables[INH4_B_RESPONSE],
             parameters[INH4_CONST_B],
-            parameters[INH4_B_TAU].apply_operation(decay),
-            parameters[INH4_B_TAU].apply_operation(init)
+            parameters[INH4_B_TAU].apply_operation(decay)
+#             parameters[INH4_B_TAU].apply_operation(init)
             ]
 
     @overrides(AbstractSynapseType.update_values)
@@ -572,7 +572,7 @@ class SynapseTypeCombExp4E4I(AbstractSynapseType):
             _inh2_a_response, _inh2_a_A, _inh2_a_decay, _inh2_a_init,
             _inh2_b_response, _inh2_b_B, _inh2_b_decay, _inh2_b_init,
 
-            _inh3_a_response, _inh3_a_A, _inh3_a_decay, _inh_a_init,
+            _inh3_a_response, _inh3_a_A, _inh3_a_decay, _inh3_a_init,
             _inh3_b_response, _inh3_b_B, _inh3_b_decay, _inh3_b_init,
 
             _inh4_a_response, _inh4_a_A, _inh4_a_decay, _inh4_a_init,
@@ -607,10 +607,18 @@ class SynapseTypeCombExp4E4I(AbstractSynapseType):
             return 0
         elif target == "excitatory2":
             return 1
-        elif target == "inhibitory":
+        elif target == "excitatory3":
             return 2
-        elif target == "inhibitory2":
+        elif target == "excitatory4":
             return 3
+        elif target == "inhibitory":
+            return 4
+        elif target == "inhibitory2":
+            return 5
+        elif target == "inhibitory3":
+            return 6
+        elif target == "inhibitory4":
+            return 7
         return None
 
     @overrides(AbstractSynapseType.get_synapse_targets)

@@ -86,8 +86,13 @@ class NeuronModelIzh(AbstractNeuronModel):
 
         # Add the rest of the data
         return [
-            parameters[A], parameters[B], parameters[C], parameters[D],
-            state_variables[V], state_variables[U], parameters[I_OFFSET],
+            parameters[A],
+            parameters[B],
+            parameters[C],
+            parameters[D],
+            state_variables[V],
+            state_variables[U],
+            parameters[I_OFFSET],
             float(ts) / 1000.0
         ]
 
