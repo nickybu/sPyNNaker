@@ -178,6 +178,7 @@ typedef struct {
 
  static inline input_t* synapse_types_get_inhibitory_input(
  		synapse_param_pointer_t parameter) {
+	 synapse_types_print_parameters(parameter);
 
 	 int_lk_t temp;
 
@@ -262,76 +263,42 @@ typedef struct {
 	 use(parameter);
  }
 
+ void _print_receptor_struct(bi_exp_parm bi_exp_param){
+	 	io_printf(IO_BUF, "a_response  = %11.4k\n", bi_exp_param.a_response);
+	 	io_printf(IO_BUF, "a_A  = %11.4k\n", bi_exp_param.a_A);
+	 	io_printf(IO_BUF, "a_decay  = %0.12k\n", bi_exp_param.a_decay);
+
+	 	io_printf(IO_BUF, "b_response  = %11.4k\n", bi_exp_param.b_response);
+	 	io_printf(IO_BUF, "b_B = %11.4k\n", bi_exp_param.b_B);
+	 	io_printf(IO_BUF, "b_decay = %0.12k\n", bi_exp_param.b_decay);
+ }
+
  static inline void synapse_types_print_parameters(synapse_param_pointer_t parameter) {
 	 use(parameter);
- /*   log_info("-------------------------------------\n");
+	 io_printf(IO_BUF, "Receptor 0\n");
+	 _print_receptor_struct(parameter->ex1_str);
+	 io_printf(IO_BUF, "Receptor 1\n");
+	 _print_receptor_struct(parameter->ex2_str);
+	 io_printf(IO_BUF, "Receptor 2\n");
+	 _print_receptor_struct(parameter->ex3_str);
+	 io_printf(IO_BUF, "Receptor 3\n");
+	 _print_receptor_struct(parameter->ex4_str);
 
-    log_info("response  = %11.4k\n", parameter->response);
- 	log_info("a_decay  = %11.4k\n", parameter->a_decay);
- 	log_info("a_init   = %11.4k\n", parameter->a_init);
- 	log_info("a_response  = %11.4k\n", parameter->a_response);
- 	log_info("b_decay = %11.4k\n", parameter->b_decay);
- 	log_info("b_init  = %11.4k\n", parameter->b_init);
- 	log_info("b_response  = %11.4k\n", parameter->b_response);
+	 io_printf(IO_BUF, "Receptor 4\n");
+	 _print_receptor_struct(parameter->inh1_str);
+	 io_printf(IO_BUF, "Receptor 5\n");
+	 _print_receptor_struct(parameter->inh2_str);
+	 io_printf(IO_BUF, "Receptor 6\n");
+	 _print_receptor_struct(parameter->inh3_str);
+	 io_printf(IO_BUF, "Receptor 7\n");
+	 _print_receptor_struct(parameter->inh4_str);
+	 io_printf(IO_BUF, "****************");
 
- 	log_info("exc2_response  = %11.4k\n", parameter->exc2_response);
- 	log_info("exc2_a_decay  = %11.4k\n", parameter->exc2_a_decay);
- 	log_info("exc2_a_init   = %11.4k\n", parameter->exc2_a_init);
- 	log_info("exc2_a_response  = %11.4k\n", parameter->exc2_a_response);
- 	log_info("exc2_b_decay = %11.4k\n", parameter->exc2_b_decay);
- 	log_info("exc2_b_init  = %11.4k\n", parameter->exc2_b_init);
- 	log_info("exc2_b_response  = %11.4k\n", parameter->exc2_b_response);
-
- 	log_info("exc3_response  = %11.4k\n", parameter->exc3_response);
- 	log_info("exc3_a_decay  = %11.4k\n", parameter->exc3_a_decay);
- 	log_info("exc3_a_init   = %11.4k\n", parameter->exc3_a_init);
- 	log_info("exc3_a_response  = %11.4k\n", parameter->exc3_a_response);
- 	log_info("exc3_b_decay = %11.4k\n", parameter->exc3_b_decay);
- 	log_info("exc3_b_init  = %11.4k\n", parameter->exc3_b_init);
- 	log_info("exc3_b_response  = %11.4k\n", parameter->exc3_b_response);
-
- 	log_info("exc4_response  = %11.4k\n", parameter->exc4_response);
- 	log_info("exc4_a_decay  = %11.4k\n", parameter->exc4_a_decay);
- 	log_info("exc4_a_init   = %11.4k\n", parameter->exc4_a_init);
- 	log_info("exc4_a_response  = %11.4k\n", parameter->exc4_a_response);
- 	log_info("exc4_b_decay = %11.4k\n", parameter->exc4_b_decay);
- 	log_info("exc4_b_init  = %11.4k\n", parameter->exc4_b_init);
- 	log_info("exc4_b_response  = %11.4k\n", parameter->exc4_b_response);
-
- 	log_info("inh_response  = %11.4k\n", parameter->inh_response);
- 	log_info("inh_a_decay  = %11.4k\n", parameter->inh_a_decay);
- 	log_info("inh_a_init   = %11.4k\n", parameter->inh_a_init);
- 	log_info("inh_a_response  = %11.4k\n", parameter->inh_a_response);
- 	log_info("inh_b_decay = %11.4k\n", parameter->inh_b_decay);
- 	log_info("inh_b_init  = %11.4k\n", parameter->inh_b_init);
- 	log_info("inh_b_response  = %11.4k\n", parameter->inh_b_response);
-
- 	log_info("inh2_response  = %11.4k\n", parameter->inh2_response);
- 	log_info("inh2_a_decay  = %11.4k\n", parameter->inh2_a_decay);
- 	log_info("inh2_a_init   = %11.4k\n", parameter->inh2_a_init);
- 	log_info("inh2_a_response  = %11.4k\n", parameter->inh2_a_response);
- 	log_info("inh2_b_decay = %11.4k\n", parameter->inh2_b_decay);
- 	log_info("inh2_b_init  = %11.4k\n", parameter->inh2_b_init);
- 	log_info("inh2_b_response  = %11.4k\n", parameter->inh2_b_response);
-
- 	log_info("inh3_response  = %11.4k\n", parameter->inh3_response);
- 	log_info("inh3_a_decay  = %11.4k\n", parameter->inh3_a_decay);
- 	log_info("inh3_a_init   = %11.4k\n", parameter->inh3_a_init);
- 	log_info("inh3_a_response  = %11.4k\n", parameter->inh3_a_response);
- 	log_info("inh3_b_decay = %11.4k\n", parameter->inh3_b_decay);
- 	log_info("inh3_b_init  = %11.4k\n", parameter->inh3_b_init);
- 	log_info("inh3_b_response  = %11.4k\n", parameter->inh3_b_response);
-
- 	log_info("inh4_response  = %11.4k\n", parameter->inh4_response);
- 	log_info("inh4_a_decay  = %11.4k\n", parameter->inh4_a_decay);
- 	log_info("inh4_a_init   = %11.4k\n", parameter->inh4_a_init);
- 	log_info("inh4_a_response  = %11.4k\n", parameter->inh4_a_response);
- 	log_info("inh4_b_decay = %11.4k\n", parameter->inh4_b_decay);
- 	log_info("inh4_b_init  = %11.4k\n", parameter->inh4_b_init);
- 	log_info("inh4_b_response  = %11.4k\n", parameter->inh4_b_response);
-
- 	*/
  }
+
+
+
+
 
  #endif // _DIFF_SYNAPSE_H_
 

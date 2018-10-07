@@ -72,7 +72,10 @@ state_t neuron_model_state_update(
 		uint16_t num_inhibitory_inputs, input_t* inh_input,
 		input_t external_bias, neuron_pointer_t neuron) {
 
-		REAL total_exc = 0;
+    neuron_model_print_state_variables(neuron);
+    neuron_model_print_parameters(neuron);
+
+    REAL total_exc = 0;
 		REAL total_inh = 0;
 
 		for (int i =0; i<num_excitatory_inputs; i++){
@@ -109,15 +112,20 @@ state_t neuron_model_get_membrane_voltage(neuron_pointer_t neuron) {
 }
 
 void neuron_model_print_state_variables(restrict neuron_pointer_t neuron) {
-    log_debug("V = %11.4k ", neuron->V);
-    log_debug("U = %11.4k ", neuron->U);
+//    io_printf(IO_BUF, "V = %k ", neuron->V);
+//    io_printf(IO_BUF, "U = %k ", neuron->U);
 }
 
 void neuron_model_print_parameters(restrict neuron_pointer_t neuron) {
-    log_debug("A = %11.4k ", neuron->A);
-    log_debug("B = %11.4k ", neuron->B);
-    log_debug("C = %11.4k ", neuron->C);
-    log_debug("D = %11.4k ", neuron->D);
-
-    log_debug("I = %11.4k \n", neuron->I_offset);
+//    io_printf(IO_BUF, "A = %11.4k ", neuron->A);
+//    io_printf(IO_BUF, "B = %11.4k ", neuron->B);
+//    io_printf(IO_BUF, "C = %11.4k ", neuron->C);
+//    io_printf(IO_BUF, "D = %11.4k ", neuron->D);
+//
+//    io_printf(IO_BUF, "V = %k ", neuron->V);
+//    io_printf(IO_BUF, "U = %k ", neuron->U);
+//
+//    io_printf(IO_BUF, "I = %11.4k \n", neuron->I_offset);
+//    io_printf(IO_BUF, "this_h = %11.4k \n", neuron->this_h);
+//    io_printf(IO_BUF, "glob dt = %11.4k \n", global_params->machine_timestep_ms);
 }
