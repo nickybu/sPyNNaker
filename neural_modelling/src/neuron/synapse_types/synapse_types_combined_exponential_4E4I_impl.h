@@ -178,7 +178,7 @@ typedef struct {
 
  static inline input_t* synapse_types_get_inhibitory_input(
  		synapse_param_pointer_t parameter) {
-	 synapse_types_print_parameters(parameter);
+//	 synapse_types_print_parameters(parameter);
 
 	 int_lk_t temp;
 

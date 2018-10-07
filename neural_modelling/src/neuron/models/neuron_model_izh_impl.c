@@ -72,8 +72,8 @@ state_t neuron_model_state_update(
 		uint16_t num_inhibitory_inputs, input_t* inh_input,
 		input_t external_bias, neuron_pointer_t neuron) {
 
-    neuron_model_print_state_variables(neuron);
-    neuron_model_print_parameters(neuron);
+//    neuron_model_print_state_variables(neuron);
+//    neuron_model_print_parameters(neuron);
 
     REAL total_exc = 0;
 		REAL total_inh = 0;

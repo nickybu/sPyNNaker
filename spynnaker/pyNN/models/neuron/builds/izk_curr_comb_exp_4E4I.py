@@ -12,14 +12,14 @@ DEFAULT_MAX_ATOMS_PER_CORE = 64
 baseline_defaults = {
         'x_a_response': 0,
         'x_a_A': 1,
-        'x_a_tau': 50,
+        'x_a_tau': 1,
         'x_b_response': 0,
         'x_b_B': -1,
-        'x_b_tau': 1,
+        'x_b_tau': 10,
 
         'i_a_response': 0,
         'i_a_A': 1,
-        'i_a_tau': 5,
+        'i_a_tau': 1,
         'i_b_response': 0,
         'i_b_B': -1,
         'i_b_tau': 10

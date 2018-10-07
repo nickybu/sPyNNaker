@@ -1041,7 +1041,7 @@ class SynapseTypeCombExp4E4I(AbstractSynapseType):
 
 def calc_rise_time(a_tau, b_tau, A=1, B=-1):
     try:
-        return numpy.log((A*b_tau) / (-B*a_tau)) * ( (a_tau*b_tau) / (b_tau - a_tau) )
+        return numpy.log(float(A*b_tau) / float(-B*a_tau)) * ( float(a_tau*b_tau) / float(b_tau - a_tau) )
     except:
         "calculation failed: ensure A!=B and that they are of opposite sign"
 
