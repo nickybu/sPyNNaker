@@ -9,7 +9,7 @@
 #include <neuron/synapse_types/synapse_types_exponential_impl.h>
 
 // Further includes
-#include <common/out_spikes.h>
+#include <out_spikes.h>
 #include <recording.h>
 #include <debug.h>
 #include <string.h>
