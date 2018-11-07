@@ -161,9 +161,9 @@ class NeuronRecorder(object):
 
         vertices = graph_mapper.get_machine_vertices(application_vertex)
         missing_str = ""
-        progress = ProgressBar(vertices,
-                               "Getting spikes for {}".format(label))
-        for vertex in progress.over(vertices):
+        # progress = ProgressBar(vertices,
+        #                        "Getting spikes for {}".format(label))
+        for vertex in vertices:
             placement = placements.get_placement_of_vertex(vertex)
             vertex_slice = graph_mapper.get_slice(vertex)
 
