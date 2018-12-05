@@ -163,13 +163,13 @@ void _multicast_packet_received_callback(uint key, uint payload) {
         // If we're not already processing synaptic DMAs,
         // flag pipeline as busy and trigger a feed event
         if (!dma_busy) {
-
-            log_debug("Sending user event for new spike");
-            if (spin1_trigger_user_event(0, 0)) {
-                dma_busy = true;
-            } else {
-                log_debug("Could not trigger user event\n");
-            }
+        	dma_busy = true;
+//            log_debug("Sending user event for new spike");
+//            if (spin1_trigger_user_event(0, 0)) {
+//                dma_busy = true;
+//            } else {
+//                log_debug("Could not trigger user event\n");
+//            }
         }
     } else {
         log_debug("Could not add spike");

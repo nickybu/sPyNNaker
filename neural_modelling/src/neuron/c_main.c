@@ -315,6 +315,9 @@ void timer_callback(uint timer_count, uint unused) {
         recording_do_timestep_update(time);
     }
 
+	// kick pipeline - make conditional on 'dma_busy'
+    spin1_trigger_user_event(0, 0);
+    
     profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_TIMER);
 }
 
