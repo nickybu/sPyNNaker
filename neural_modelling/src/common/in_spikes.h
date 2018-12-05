@@ -46,6 +46,12 @@ static inline void in_spikes_print_buffer() {
     circular_buffer_print_buffer(buffer);
 }
 
+static inline void in_spikes_flush_buffer() {
+	// If not empty, add remaining events to total,
+	// and check if high water mark.
+	circular_buffer_clear(buffer);
+}
+
 //---------------------------------------
 // Synaptic rewiring functions
 //---------------------------------------
