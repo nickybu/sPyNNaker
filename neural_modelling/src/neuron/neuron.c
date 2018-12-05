@@ -76,6 +76,10 @@ static uint32_t expected_time;
 //! The number of recordings outstanding
 static uint32_t n_recordings_outstanding = 0;
 
+extern uint32_t last_spikes;
+extern uint32_t last_restarts;
+extern uint32_t temp_timer_callback_completed;
+
 //! parameters that reside in the neuron_parameter_data_region in human
 //! readable form
 typedef enum parameters_in_neuron_parameter_data_region {
@@ -322,12 +326,17 @@ void neuron_do_timestep_update(timer_t time) {
         bool spike = neuron_impl_do_timestep_update(
             neuron_index, external_bias, recorded_variable_values);
 
+        recorded_variable_values[0] = (200000 - temp_timer_callback_completed) >> 4;
+        recorded_variable_values[1] = last_spikes;
+        recorded_variable_values[2] = last_restarts;
+
         // Write the recorded variable values
         for (uint32_t i = 0; i < n_recorded_vars; i++) {
             uint32_t index = var_recording_indexes[i][neuron_index];
             var_recording_values[i]->states[index] =
                 recorded_variable_values[i];
         }
+
 
         // If the neuron has spiked
         if (spike) {

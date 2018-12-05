@@ -70,6 +70,9 @@ uint32_t timer_callback_completed = 0;
 uint32_t temp_timer_callback_completed = 0;
 uint32_t spike_pipeline_deactivated = 0;
 
+uint32_t last_spikes = 0;
+uint32_t last_restarts = 0;
+uint32_t deactivation_time = 0;
 
 //! the current timer tick value
 //! the timer tick callback returning the same value.
@@ -262,11 +265,11 @@ void timer_callback(uint timer_count, uint unused) {
     use(unused);
 
     // Get number of spikes in last tick, and reset spike counter
-    uint32_t last_spikes = spike_processing_get_and_reset_spikes_this_tick();
+    last_spikes = spike_processing_get_and_reset_spikes_this_tick();
     uint32_t last_dmas = spike_processing_get_and_reset_dmas_this_tick();
-    uint32_t last_restarts =
+    last_restarts =
     		spike_processing_get_and_reset_pipeline_restarts_this_tick();
-    uint32_t deactivation_time = spike_processing_get_pipeline_deactivation_time();
+    deactivation_time = spike_processing_get_pipeline_deactivation_time();
 
     if (last_spikes > max_spikes_in_a_tick){
     	max_spikes_in_a_tick = last_spikes;
