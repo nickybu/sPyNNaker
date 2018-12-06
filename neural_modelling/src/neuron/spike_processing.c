@@ -16,7 +16,8 @@
 extern uint32_t time;
 
 // True if the DMA "loop" is currently running
-static bool dma_busy;
+//static bool dma_busy;
+bool dma_busy;
 
 // The DTCM buffers for the synapse rows
 static dma_buffer dma_buffers[N_DMA_BUFFERS];
@@ -35,6 +36,7 @@ static uint32_t single_fixed_synapse[4];
 
 uint32_t number_of_rewires=0;
 bool any_spike = false;
+extern bool timer_callback_active;
 
 /* PRIVATE FUNCTIONS - static for inlining */
 
@@ -160,16 +162,20 @@ void _multicast_packet_received_callback(uint key, uint payload) {
     // If there was space to add spike to incoming spike queue
     if (in_spikes_add_spike(key)) {
 
+
+//    	uint32_t temp_x = in_spikes_flush_buffer();
         // If we're not already processing synaptic DMAs,
         // flag pipeline as busy and trigger a feed event
-        if (!dma_busy) {
+        if (!dma_busy & !timer_callback_active) { // and timer callback has finished, so kick pipeline
         	dma_busy = true;
-//            log_debug("Sending user event for new spike");
-//            if (spin1_trigger_user_event(0, 0)) {
-//                dma_busy = true;
-//            } else {
-//                log_debug("Could not trigger user event\n");
-//            }
+            log_debug("Sending user event for new spike");
+            if (spin1_trigger_user_event(0, 0)) {
+                dma_busy = true;
+            } else {
+                log_debug("Could not trigger user event\n");
+            }
+        } else if(!dma_busy) { // timer callback is still going, and will kick pipeline at end
+        	dma_busy = true;
         }
     } else {
         log_debug("Could not add spike");
@@ -269,6 +275,11 @@ bool spike_processing_initialise(
 
     return true;
 }
+
+uint32_t spike_processing_clear_spike_buffer(){
+	return in_spikes_flush_buffer();
+}
+
 
 void spike_processing_finish_write(uint32_t process_id) {
     _setup_synaptic_dma_write(process_id);

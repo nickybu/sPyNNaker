@@ -15,7 +15,7 @@
  *
  */
 
-#include <common/in_spikes.h>
+//#include "../common/in_spikes.h"
 #include "regions.h"
 #include "neuron.h"
 #include "synapses.h"
@@ -48,7 +48,7 @@ typedef enum extra_provenance_data_region_entries{
 
 //! values for the priority for each callback
 typedef enum callback_priorities{
-    MC = -1, DMA = 0, USER = 0, SDP = 1, TIMER = 2
+    MC = -1, DMA = 0, USER = 0, SDP = 1, TIMER = 0
 } callback_priorities;
 
 //! The number of regions that are to be used for recording
@@ -80,6 +80,9 @@ bool rewiring = false;
 
 // FOR DEBUGGING!
 uint32_t count_rewires = 0;
+
+bool timer_callback_active = false;
+extern bool dma_busy;
 
 
 //! \brief Initialises the recording parts of the model
@@ -231,10 +234,22 @@ void timer_callback(uint timer_count, uint unused) {
     use(timer_count);
     use(unused);
 
-    profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_TIMER);
+
+    uint cpsr = spin1_int_disable();
+    uint32_t temp_x = spike_processing_clear_spike_buffer();
+    timer_callback_active = true;
+    spin1_mode_restore(cpsr);
 
     time++;
     last_rewiring_time++;
+
+    if (temp_x > 0){
+    	io_printf(IO_BUF, "At time: %u, flushed spikes: %u\n", time, temp_x);
+    }
+
+    profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_TIMER);
+
+
 
     // This is the part where I save the input and output indices
     //   from the circular buffer
@@ -277,7 +292,8 @@ void timer_callback(uint timer_count, uint unused) {
         return;
     }
 
-    uint cpsr = 0;
+    //uint
+	cpsr = 0;
     // Do rewiring
     if (rewiring &&
         ((last_rewiring_time >= rewiring_period && !is_fast()) || is_fast())) {
@@ -316,8 +332,14 @@ void timer_callback(uint timer_count, uint unused) {
     }
 
 	// kick pipeline - make conditional on 'dma_busy'
-    spin1_trigger_user_event(0, 0);
-    
+
+    if (dma_busy){
+    	spin1_trigger_user_event(0, 0);
+
+    } // else no spikes have been received while we were processing the neurons.
+
+    timer_callback_active = false;
+
     profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_TIMER);
 }
 
