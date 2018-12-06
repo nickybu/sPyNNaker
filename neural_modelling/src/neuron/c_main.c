@@ -235,17 +235,17 @@ void timer_callback(uint timer_count, uint unused) {
     use(unused);
 
 
-    uint cpsr = spin1_int_disable();
-    uint32_t temp_x = spike_processing_clear_spike_buffer();
-    timer_callback_active = true;
-    spin1_mode_restore(cpsr);
+//    uint cpsr = spin1_int_disable();
+//    uint32_t temp_x = spike_processing_clear_spike_buffer();
+//    timer_callback_active = true;
+//    spin1_mode_restore(cpsr);
 
     time++;
     last_rewiring_time++;
 
-    if (temp_x > 0){
-    	io_printf(IO_BUF, "At time: %u, flushed spikes: %u\n", time, temp_x);
-    }
+//    if (temp_x > 0){
+//    	io_printf(IO_BUF, "At time: %u, flushed spikes: %u\n", time, temp_x);
+//    }
 
     profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_TIMER);
 
@@ -292,8 +292,7 @@ void timer_callback(uint timer_count, uint unused) {
         return;
     }
 
-    //uint
-	cpsr = 0;
+    uint cpsr = 0;
     // Do rewiring
     if (rewiring &&
         ((last_rewiring_time >= rewiring_period && !is_fast()) || is_fast())) {

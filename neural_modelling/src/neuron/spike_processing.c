@@ -229,6 +229,19 @@ void _dma_complete_callback(uint unused, uint tag) {
         }
     } while (subsequent_spikes);
 
+    // if timer is getting low, don't do next DMA and instead flush spike buffer
+    if (tc[T1_COUNT] < 6657){
+    	    uint cpsr = spin1_int_disable();
+    	    uint32_t spikes_remaining = spike_processing_clear_spike_buffer();
+    	    timer_callback_active = true;
+    	    spin1_mode_restore(cpsr);
+
+    	    if (spikes_remaining > 0){
+    	    	io_printf(IO_BUF, "At time: %u, flushed spikes: %u\n",
+    	    			time, spikes_remaining);
+    	    }
+    }
+
     // Start the next DMA transfer, so it is complete when we are finished
     _setup_synaptic_dma_read();
 }
