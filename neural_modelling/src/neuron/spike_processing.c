@@ -246,8 +246,8 @@ void _dma_complete_callback(uint unused, uint tag) {
     	    		max_flushed_spikes = spikes_remaining;
     	    	}
 
-    	    	io_printf(IO_BUF, "At time: %u, flushed spikes: %u\n",
-    	    			time, spikes_remaining);
+    	    	//io_printf(IO_BUF, "At time: %u, flushed spikes: %u\n",
+    	    	//		time, spikes_remaining);
     	    }
     }
 
