@@ -171,7 +171,7 @@ class PopulationMachineVertex(
                     label, x, y, p, max_unprocessed_spikes))))
         provenance_items.append(ProvenanceDataItem(
             self._add_name(names,
-                           "Total unprocessed spikes over entrie simulation"),
+                           "Total unprocessed spikes over entire simulation"),
             total_unprocessed_spikes,
             report=total_unprocessed_spikes > 0,
             message=(
