@@ -42,7 +42,9 @@ class PopulationMachineVertex(
                ("SATURATION_COUNT", 1),
                ("BUFFER_OVERFLOW_COUNT", 2),
                ("CURRENT_TIMER_TIC", 3),
-               ("PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT", 4)])
+               ("PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT", 4),
+               ("MAX_FLUSHED_SPIKES", 5),
+               ("TOTAL_FLUSHED_SPIKES", 6)])
 
     PROFILE_TAG_LABELS = {
         0: "TIMER",
@@ -115,6 +117,10 @@ class PopulationMachineVertex(
         n_plastic_saturations = provenance_data[
             self.EXTRA_PROVENANCE_DATA_ENTRIES.
             PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT.value]
+        max_unprocessed_spikes = provenance_data[
+            self.EXTRA_PROVENANCE_DATA_ENTRIES.MAX_FLUSHED_SPIKES.value]
+        total_unprocessed_spikes = provenance_data[
+            self.EXTRA_PROVENANCE_DATA_ENTRIES.TOTAL_FLUSHED_SPIKES.value]
 
         label, x, y, p, names = self._get_placement_details(placement)
 
@@ -157,6 +163,24 @@ class PopulationMachineVertex(
                 "spikes_per_second and / or ring_buffer_sigma values located "
                 "within the .spynnaker.cfg file.".format(
                     label, x, y, p, n_plastic_saturations))))
+        provenance_items.append(ProvenanceDataItem(
+            self._add_name(names,
+                           "Max unprocessed spikes in a single time step"),
+            max_unprocessed_spikes,
+            report=max_unprocessed_spikes > 0,
+            message=(
+                "Max unprocessed spikes in a timestep for {} on {}, {}, {} "
+                "was {}. Please adjust the timescale factor".format(
+                    label, x, y, p, max_unprocessed_spikes))))
+        provenance_items.append(ProvenanceDataItem(
+            self._add_name(names,
+                           "Total unprocessed spikes over entrie simulation"),
+            total_unprocessed_spikes,
+            report=total_unprocessed_spikes > 0,
+            message=(
+                "Total unprocessed spikes over entire simulation for {} on"
+                "{}, {}, {} was {}. Please adjust the timescale factor".format(
+                    label, x, y, p, total_unprocessed_spikes))))
 
         return provenance_items
 

@@ -43,7 +43,9 @@ typedef enum extra_provenance_data_region_entries{
     SYNAPTIC_WEIGHT_SATURATION_COUNT = 1,
     INPUT_BUFFER_OVERFLOW_COUNT = 2,
     CURRENT_TIMER_TICK = 3,
-    PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT = 4
+    PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT = 4,
+	MAX_FLUSHED_SPIKES = 5,
+	TOTAL_FLUSHED_SPIKES = 6
 } extra_provenance_data_region_entries;
 
 //! values for the priority for each callback
@@ -108,6 +110,10 @@ void c_main_store_provenance_data(address_t provenance_region){
     provenance_region[CURRENT_TIMER_TICK] = time;
     provenance_region[PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT] =
             synapse_dynamics_get_plastic_saturation_count();
+    provenance_region[MAX_FLUSHED_SPIKES] =
+    		spike_processing_get_max_flushed_spikes();
+	provenance_region[TOTAL_FLUSHED_SPIKES] =
+			spike_processing_get_total_flushed_spikes();
     log_debug("finished other provenance data");
 }
 

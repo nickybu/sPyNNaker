@@ -34,6 +34,9 @@ static spike_t spike=-1;
 
 static uint32_t single_fixed_synapse[4];
 
+static uint32_t total_flushed_spikes;
+static uint32_t max_flushed_spikes;
+
 uint32_t number_of_rewires=0;
 bool any_spike = false;
 extern bool timer_callback_active;
@@ -237,6 +240,12 @@ void _dma_complete_callback(uint unused, uint tag) {
     	    spin1_mode_restore(cpsr);
 
     	    if (spikes_remaining > 0){
+    	    	total_flushed_spikes += spikes_remaining;
+
+    	    	if (spikes_remaining > max_flushed_spikes){
+    	    		max_flushed_spikes = spikes_remaining;
+    	    	}
+
     	    	io_printf(IO_BUF, "At time: %u, flushed spikes: %u\n",
     	    			time, spikes_remaining);
     	    }
@@ -332,4 +341,12 @@ bool do_rewiring(int number_of_rew) {
 //! \return bool
 bool received_any_spike() {
     return any_spike;
+}
+
+uint32_t spike_processing_get_total_flushed_spikes(){
+	return total_flushed_spikes;
+}
+
+uint32_t spike_processing_get_max_flushed_spikes(){
+	return max_flushed_spikes;
 }

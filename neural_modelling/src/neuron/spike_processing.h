@@ -15,6 +15,18 @@ void spike_processing_finish_write(uint32_t process_id);
 //! \return the number of times the input buffer has overflowed
 uint32_t spike_processing_get_buffer_overflows();
 
+//! \brief returns the total unprocessed spikes from a simulation
+//! \return total unprocessed spikes
+uint32_t spike_processing_get_total_flushed_spikes();
+
+//! \brief returns the maximum unprocessed spikes from a single
+//! simulation timestep.
+//! \return maximum unprocessed spikes from a single timestep.
+uint32_t spike_processing_get_max_flushed_spikes();
+
+
+
+
 
 //! DMA buffer structure combines the row read from SDRAM with
 typedef struct dma_buffer {
