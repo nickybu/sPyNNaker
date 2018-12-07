@@ -141,10 +141,7 @@ class PopulationMachineVertex(
             report=n_buffer_overflows > 0,
             message=(
                 "The input spike buffer for {} on {}, {}, {} lost packets on {} "
-                "occasions. This is often a sign that the system is running "
-                "too quickly for the number of neurons per core.  Please "
-                "increase the timer_tic or time_scale_factor or decrease the "
-                "number of neurons per core.".format(
+                "occasions. Were you expecting this many spikes in a single timestep?".format(
                     label, x, y, p, n_buffer_overflows))))
         provenance_items.append(ProvenanceDataItem(
             self._add_name(names, "Total_pre_synaptic_events"),
