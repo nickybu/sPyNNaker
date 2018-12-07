@@ -48,8 +48,6 @@ static inline void in_spikes_print_buffer() {
     circular_buffer_print_buffer(buffer);
 }
 
-
-
 //---------------------------------------
 // Synaptic rewiring functions
 //---------------------------------------

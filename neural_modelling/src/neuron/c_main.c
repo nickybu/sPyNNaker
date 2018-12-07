@@ -249,13 +249,7 @@ void timer_callback(uint timer_count, uint unused) {
     time++;
     last_rewiring_time++;
 
-//    if (temp_x > 0){
-//    	io_printf(IO_BUF, "At time: %u, flushed spikes: %u\n", time, temp_x);
-//    }
-
     profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_TIMER);
-
-
 
     // This is the part where I save the input and output indices
     //   from the circular buffer

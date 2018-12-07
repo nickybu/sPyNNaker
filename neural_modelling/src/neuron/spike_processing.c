@@ -164,12 +164,10 @@ void _multicast_packet_received_callback(uint key, uint payload) {
 
     // If there was space to add spike to incoming spike queue
     if (in_spikes_add_spike(key)) {
-
-
-//    	uint32_t temp_x = in_spikes_flush_buffer();
         // If we're not already processing synaptic DMAs,
         // flag pipeline as busy and trigger a feed event
-        if (!dma_busy & !timer_callback_active) { // and timer callback has finished, so kick pipeline
+    	// (and timer callback has finished, so kick pipeline)
+        if (!dma_busy & !timer_callback_active) {
         	dma_busy = true;
             log_debug("Sending user event for new spike");
             if (spin1_trigger_user_event(0, 0)) {
@@ -177,7 +175,7 @@ void _multicast_packet_received_callback(uint key, uint payload) {
             } else {
                 log_debug("Could not trigger user event\n");
             }
-        } else if(!dma_busy) { // timer callback is still going, and will kick pipeline at end
+        } else if (!dma_busy) { // timer callback is still going, and will kick pipeline at end
         	dma_busy = true;
         }
     } else {

@@ -24,10 +24,6 @@ uint32_t spike_processing_get_total_flushed_spikes();
 //! \return maximum unprocessed spikes from a single timestep.
 uint32_t spike_processing_get_max_flushed_spikes();
 
-
-
-
-
 //! DMA buffer structure combines the row read from SDRAM with
 typedef struct dma_buffer {
 
