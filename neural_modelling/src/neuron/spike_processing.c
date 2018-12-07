@@ -232,7 +232,7 @@ void _dma_complete_callback(uint unused, uint tag) {
     // if timer is getting low, don't do next DMA and instead flush spike buffer
     if (tc[T1_COUNT] < 6657){
     	    uint cpsr = spin1_int_disable();
-    	    uint32_t spikes_remaining = spike_processing_clear_spike_buffer();
+    	    uint32_t spikes_remaining = in_spikes_flush_buffer();
     	    timer_callback_active = true;
     	    spin1_mode_restore(cpsr);
 
@@ -288,11 +288,6 @@ bool spike_processing_initialise(
 
     return true;
 }
-
-uint32_t spike_processing_clear_spike_buffer(){
-	return in_spikes_flush_buffer();
-}
-
 
 void spike_processing_finish_write(uint32_t process_id) {
     _setup_synaptic_dma_write(process_id);
