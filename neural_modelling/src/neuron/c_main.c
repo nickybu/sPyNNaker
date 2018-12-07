@@ -15,7 +15,7 @@
  *
  */
 
-#include <common/in_spikes.h>
+//#include "../common/in_spikes.h"
 #include "regions.h"
 #include "neuron.h"
 #include "synapses.h"
@@ -44,12 +44,13 @@ typedef enum extra_provenance_data_region_entries{
     INPUT_BUFFER_OVERFLOW_COUNT = 2,
     CURRENT_TIMER_TICK = 3,
     PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT = 4,
-	GHOST_POP_TABLE_SEARCHES = 5
+	MAX_FLUSHED_SPIKES = 5,
+	TOTAL_FLUSHED_SPIKES = 6
 } extra_provenance_data_region_entries;
 
 //! values for the priority for each callback
 typedef enum callback_priorities{
-    MC = -1, DMA = 0, USER = 0, SDP = 1, TIMER = 2
+    MC = -1, DMA = 0, USER = 0, SDP = 1, TIMER = 0
 } callback_priorities;
 
 //! The number of regions that are to be used for recording
@@ -82,6 +83,9 @@ bool rewiring = false;
 // FOR DEBUGGING!
 uint32_t count_rewires = 0;
 
+bool timer_callback_active = false;
+extern bool dma_busy;
+
 
 //! \brief Initialises the recording parts of the model
 //! \param[in] recording_address: the address in SDRAM where to store
@@ -106,9 +110,11 @@ void c_main_store_provenance_data(address_t provenance_region){
     provenance_region[CURRENT_TIMER_TICK] = time;
     provenance_region[PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT] =
             synapse_dynamics_get_plastic_saturation_count();
+    provenance_region[MAX_FLUSHED_SPIKES] =
+    		spike_processing_get_max_flushed_spikes();
+	provenance_region[TOTAL_FLUSHED_SPIKES] =
+			spike_processing_get_total_flushed_spikes();
     log_debug("finished other provenance data");
-    provenance_region[GHOST_POP_TABLE_SEARCHES]=
-    	spike_processing_get_ghost_pop_table_searches();
     io_printf (IO_BUF, "n_ghost_input_spikes=%d\n",spike_processing_get_ghost_pop_table_searches());
     io_printf (IO_BUF, "empty row count = %d\n",synapses_get_empty_row_count());
     io_printf (IO_BUF, "dma_complete_count=%d\n",spike_processing_get_dma_complete_count());
@@ -244,6 +250,8 @@ void timer_callback(uint timer_count, uint unused) {
     time++;
     last_rewiring_time++;
 
+    profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_TIMER);
+
     // This is the part where I save the input and output indices
     //   from the circular buffer
     // If time == 0 as well as output == input == 0  then no rewire is
@@ -264,7 +272,7 @@ void timer_callback(uint timer_count, uint unused) {
         neuron_store_neuron_parameters(
             data_specification_get_region(NEURON_PARAMS_REGION, address));
 
-//        profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_TIMER);
+        profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_TIMER);
 
         // Finalise any recordings that are in progress, writing back the final
         // amounts of samples recorded to SDRAM
@@ -279,6 +287,7 @@ void timer_callback(uint timer_count, uint unused) {
         time -= 1;
 
         log_debug("Rewire tries = %d", count_rewires);
+
         simulation_ready_to_read();
 
         return;
@@ -322,7 +331,16 @@ void timer_callback(uint timer_count, uint unused) {
         recording_do_timestep_update(time);
     }
 
-//    profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_TIMER);
+	// kick pipeline - make conditional on 'dma_busy'
+
+    if (dma_busy){
+    	spin1_trigger_user_event(0, 0);
+
+    } // else no spikes have been received while we were processing the neurons.
+
+    timer_callback_active = false;
+
+    profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_TIMER);
 }
 
 //! \brief The entry point for this model.

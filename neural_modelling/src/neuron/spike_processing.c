@@ -17,7 +17,8 @@
 extern uint32_t time;
 
 // True if the DMA "loop" is currently running
-static bool dma_busy;
+//static bool dma_busy;
+bool dma_busy;
 
 // The DTCM buffers for the synapse rows
 static dma_buffer dma_buffers[N_DMA_BUFFERS];
@@ -34,16 +35,20 @@ static spike_t spike=-1;
 
 static uint32_t single_fixed_synapse[4];
 
+static uint32_t total_flushed_spikes;
+static uint32_t max_flushed_spikes;
+
 uint32_t number_of_rewires=0;
 bool any_spike = false;
 static uint32_t dma_complete_count=0;
 static uint32_t spike_processing_count=0;
+extern bool timer_callback_active;
 
 /* PRIVATE FUNCTIONS - static for inlining */
 
 static inline void _do_dma_read(
         address_t row_address, size_t n_bytes_to_transfer) {
-//    profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_DMA_READ);
+
     // Write the SDRAM address of the plastic region and the
     // Key of the originating spike to the beginning of DMA buffer
     dma_buffer *next_buffer = &dma_buffers[next_buffer_to_fill];
@@ -67,7 +72,6 @@ static inline void _do_direct_row(address_t row_address) {
 }
 
 void _setup_synaptic_dma_read() {
-//    profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_INCOMING_SPIKE);
 
     // Set up to store the DMA location and size to read
     address_t row_address;
@@ -165,17 +169,19 @@ void _multicast_packet_received_callback(uint key, uint payload) {
 
     // If there was space to add spike to incoming spike queue
     if (in_spikes_add_spike(key)) {
-
         // If we're not already processing synaptic DMAs,
         // flag pipeline as busy and trigger a feed event
-        if (!dma_busy) {
-
+    	// (and timer callback has finished, so kick pipeline)
+        if (!dma_busy & !timer_callback_active) {
+        	dma_busy = true;
             log_debug("Sending user event for new spike");
             if (spin1_trigger_user_event(0, 0)) {
                 dma_busy = true;
             } else {
                 log_debug("Could not trigger user event\n");
             }
+        } else if (!dma_busy) { // timer callback is still going, and will kick pipeline at end
+        	dma_busy = true;
         }
     } else {
         log_debug("Could not add spike");
@@ -229,7 +235,26 @@ void _dma_complete_callback(uint unused, uint tag) {
             rt_error(RTE_SWERR);
         }
     } while (subsequent_spikes);
-//    profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_DMA_READ);
+
+    // if timer is getting low, don't do next DMA and instead flush spike buffer
+    if (tc[T1_COUNT] < 6657){
+    	    uint cpsr = spin1_int_disable();
+    	    uint32_t spikes_remaining = in_spikes_flush_buffer();
+    	    timer_callback_active = true;
+    	    spin1_mode_restore(cpsr);
+
+    	    if (spikes_remaining > 0){
+    	    	total_flushed_spikes += spikes_remaining;
+
+    	    	if (spikes_remaining > max_flushed_spikes){
+    	    		max_flushed_spikes = spikes_remaining;
+    	    	}
+
+    	    	//io_printf(IO_BUF, "At time: %u, flushed spikes: %u\n",
+    	    	//		time, spikes_remaining);
+    	    }
+    }
+
     // Start the next DMA transfer, so it is complete when we are finished
     _setup_synaptic_dma_read();
 }
@@ -332,4 +357,12 @@ bool do_rewiring(int number_of_rew) {
 //! \return bool
 bool received_any_spike() {
     return any_spike;
+}
+
+uint32_t spike_processing_get_total_flushed_spikes(){
+	return total_flushed_spikes;
+}
+
+uint32_t spike_processing_get_max_flushed_spikes(){
+	return max_flushed_spikes;
 }

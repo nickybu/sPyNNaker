@@ -20,6 +20,14 @@ uint32_t spike_processing_get_ghost_pop_table_searches();
 
 uint32_t spike_processing_get_dma_complete_count();
 uint32_t spike_processing_get_spike_processing_count();
+//! \brief returns the total unprocessed spikes from a simulation
+//! \return total unprocessed spikes
+uint32_t spike_processing_get_total_flushed_spikes();
+
+//! \brief returns the maximum unprocessed spikes from a single
+//! simulation timestep.
+//! \return maximum unprocessed spikes from a single timestep.
+uint32_t spike_processing_get_max_flushed_spikes();
 
 //! DMA buffer structure combines the row read from SDRAM with
 typedef struct dma_buffer {
@@ -55,6 +63,7 @@ bool get_dma_busy();
 //! \brief set the number of times spike_processing has to attempt rewiring
 //! \return bool: currently, always true
 bool do_rewiring(int number_of_rew);
+
 
 //! exposing this so that other classes can call it
 void _setup_synaptic_dma_read();

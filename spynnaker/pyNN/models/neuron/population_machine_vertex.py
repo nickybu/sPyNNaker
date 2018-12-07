@@ -43,7 +43,8 @@ class PopulationMachineVertex(
                ("BUFFER_OVERFLOW_COUNT", 2),
                ("CURRENT_TIMER_TIC", 3),
                ("PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT", 4),
-               ("GHOST_POP_TABLE_SEARCHES", 5)])
+               ("MAX_FLUSHED_SPIKES", 5),
+               ("TOTAL_FLUSHED_SPIKES", 6)])
 
     PROFILE_TAG_LABELS = {
         0: "TIMER",
@@ -116,8 +117,10 @@ class PopulationMachineVertex(
         n_plastic_saturations = provenance_data[
             self.EXTRA_PROVENANCE_DATA_ENTRIES.
             PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT.value]
-        n_ghost_searches = provenance_data[
-            self.EXTRA_PROVENANCE_DATA_ENTRIES.GHOST_POP_TABLE_SEARCHES.value]
+        max_unprocessed_spikes = provenance_data[
+            self.EXTRA_PROVENANCE_DATA_ENTRIES.MAX_FLUSHED_SPIKES.value]
+        total_unprocessed_spikes = provenance_data[
+            self.EXTRA_PROVENANCE_DATA_ENTRIES.TOTAL_FLUSHED_SPIKES.value]
 
         label, x, y, p, names = self._get_placement_details(placement)
 
@@ -137,11 +140,8 @@ class PopulationMachineVertex(
             n_buffer_overflows,
             report=n_buffer_overflows > 0,
             message=(
-                "The input buffer for {} on {}, {}, {} lost packets on {} "
-                "occasions. This is often a sign that the system is running "
-                "too quickly for the number of neurons per core.  Please "
-                "increase the timer_tic or time_scale_factor or decrease the "
-                "number of neurons per core.".format(
+                "The input spike buffer for {} on {}, {}, {} lost packets on {} "
+                "occasions. Were you expecting this many spikes in a single timestep?".format(
                     label, x, y, p, n_buffer_overflows))))
         provenance_items.append(ProvenanceDataItem(
             self._add_name(names, "Total_pre_synaptic_events"),
@@ -161,15 +161,24 @@ class PopulationMachineVertex(
                 "within the .spynnaker.cfg file.".format(
                     label, x, y, p, n_plastic_saturations))))
         provenance_items.append(ProvenanceDataItem(
-            self._add_name(names, "Number of failed pop table searches"),
-            n_ghost_searches,
-            report=n_ghost_searches > 0,
+            self._add_name(names,
+                           "Max unprocessed spikes in a single time step"),
+            max_unprocessed_spikes,
+            report=max_unprocessed_spikes > 0,
             message=(
-                "The number of failed population table searches for {} on {},"
-                " {}, {} was {}. If this number is large relative to the "
-                "predicted incoming spike rate, try increasing source and "
-                "target neruons per core".format(
-                    label, x, y, p, n_ghost_searches))))
+                "Max unprocessed spikes in a timestep for {} on {}, {}, {} "
+                "was {}. Please adjust the timescale factor".format(
+                    label, x, y, p, max_unprocessed_spikes))))
+        provenance_items.append(ProvenanceDataItem(
+            self._add_name(names,
+                           "Total unprocessed spikes over entrie simulation"),
+            total_unprocessed_spikes,
+            report=total_unprocessed_spikes > 0,
+            message=(
+                "Total unprocessed spikes over entire simulation for {} on "
+                "{}, {}, {} was {}. Please adjust the timescale factor".format(
+                    label, x, y, p, total_unprocessed_spikes))))
+
         return provenance_items
 
     @overrides(AbstractReceiveBuffersToHost.get_minimum_buffer_sdram_usage)
