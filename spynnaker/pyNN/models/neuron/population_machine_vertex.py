@@ -140,7 +140,7 @@ class PopulationMachineVertex(
             n_buffer_overflows,
             report=n_buffer_overflows > 0,
             message=(
-                "The input buffer for {} on {}, {}, {} lost packets on {} "
+                "The input spike buffer for {} on {}, {}, {} lost packets on {} "
                 "occasions. This is often a sign that the system is running "
                 "too quickly for the number of neurons per core.  Please "
                 "increase the timer_tic or time_scale_factor or decrease the "
@@ -178,7 +178,7 @@ class PopulationMachineVertex(
             total_unprocessed_spikes,
             report=total_unprocessed_spikes > 0,
             message=(
-                "Total unprocessed spikes over entire simulation for {} on"
+                "Total unprocessed spikes over entire simulation for {} on "
                 "{}, {}, {} was {}. Please adjust the timescale factor".format(
                     label, x, y, p, total_unprocessed_spikes))))
 
