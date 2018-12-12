@@ -1,7 +1,7 @@
 #include "population_table.h"
 #include <neuron/synapse_row.h>
 #include <debug.h>
-#include "profile_tags.h"
+//#include "profile_tags.h"
 #include <profiler.h>
 
 
