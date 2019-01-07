@@ -371,7 +371,7 @@ class SpikeSourcePoissonVertex(
             # avoid a possible division by zero / small number (which may
             # result in a value that doesn't fit in a uint32) by only
             # setting time_between_spikes if spikes_per_timestep is > 1
-            time_between_spikes = 0.0
+            time_between_spikes = 1.0
             if spikes_per_timestep > 1:
                 time_between_spikes = (
                     (machine_time_step * time_scale_factor) /
