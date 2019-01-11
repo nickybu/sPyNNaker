@@ -9,6 +9,7 @@ from spinn_front_end_common.utilities.connections import LiveEventConnection
 from spinn_front_end_common.utilities.exceptions import ConfigurationException
 from spinn_front_end_common.utilities.constants import NOTIFY_PORT
 from spinnman.constants import SCP_SCAMP_PORT
+import decimal
 
 _MAX_RATES_PER_PACKET = 32
 
@@ -118,7 +119,8 @@ class SpynnakerPoissonControlConnection(LiveEventConnection):
         for _ in range(_MAX_RATES_PER_PACKET):
             neuron_id, rate = neuron_id_rates[pos]
             key = id_to_key_map[neuron_id]
-            message.add_key_and_payload(key, int(round(rate * scale)))
+            message.add_key_and_payload(
+                key, int(round(decimal.Decimal(rate) * scale)))
             pos += 1
             if pos >= len(neuron_id_rates):
                 break
