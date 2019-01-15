@@ -2,14 +2,15 @@ from spinn_utilities.overrides import overrides
 
 from spinnman.messages.eieio import EIEIOType
 from spinnman.messages.eieio.data_messages import EIEIODataMessage
+from spinnman.constants import SCP_SCAMP_PORT
 
 from data_specification.enums import DataType
 
 from spinn_front_end_common.utilities.connections import LiveEventConnection
 from spinn_front_end_common.utilities.exceptions import ConfigurationException
 from spinn_front_end_common.utilities.constants import NOTIFY_PORT
-from spinnman.constants import SCP_SCAMP_PORT
-import decimal
+
+from decimal import Decimal
 
 _MAX_RATES_PER_PACKET = 32
 
@@ -120,7 +121,7 @@ class SpynnakerPoissonControlConnection(LiveEventConnection):
             neuron_id, rate = neuron_id_rates[pos]
             key = id_to_key_map[neuron_id]
             message.add_key_and_payload(
-                key, int(round(decimal.Decimal(rate) * scale)))
+                key, int(round(Decimal(str(rate)) * scale)))
             pos += 1
             if pos >= len(neuron_id_rates):
                 break
