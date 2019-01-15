@@ -2,14 +2,15 @@ from spinn_utilities.overrides import overrides
 
 from spinnman.messages.eieio import EIEIOType
 from spinnman.messages.eieio.data_messages import EIEIODataMessage
+from spinnman.constants import SCP_SCAMP_PORT
 
 from data_specification.enums import DataType
 
 from spinn_front_end_common.utilities.connections import LiveEventConnection
 from spinn_front_end_common.utilities.exceptions import ConfigurationException
 from spinn_front_end_common.utilities.constants import NOTIFY_PORT
+
 from decimal import Decimal
-from spinnman.constants import SCP_SCAMP_PORT
 
 _MAX_RATES_PER_PACKET = 32
 
