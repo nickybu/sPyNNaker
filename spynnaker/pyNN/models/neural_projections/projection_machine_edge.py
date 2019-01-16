@@ -51,7 +51,7 @@ class ProjectionMachineEdge(
                 post_hi = graph_mapper.get_slice(self.post_vertex).hi_atom
                 #run through connection list and return false if we find any connections between the pre and post vertices
                 try:
-                    if synapse_info.connector._conn_matrix[pre_lo:pre_hi,post_lo:post_hi].max()>0:
+                    if synapse_info.connector._conn_matrix[pre_lo:pre_hi+1,post_lo:post_hi+1].max()>0:
                         return False
                 except ValueError:
                     print "Value error"
