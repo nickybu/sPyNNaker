@@ -1,31 +1,22 @@
-# utils imports
+import logging
+import math
+import os
+from six import add_metaclass
 from spinn_utilities.abstract_base import AbstractBase
 from spinn_utilities.log import FormatAdapter
-
-# common front end imports
-from spinn_front_end_common.interface.abstract_spinnaker_base \
-    import AbstractSpinnakerBase
+from spinn_front_end_common.interface.abstract_spinnaker_base import (
+    AbstractSpinnakerBase)
 from spinn_front_end_common.utilities.exceptions import ConfigurationException
 from spinn_front_end_common.utility_models import CommandSender
 from spinn_front_end_common.utilities.utility_objs import ExecutableFinder
 from spinn_front_end_common.utilities import globals_variables
-
-# local front end imports
-from spynnaker.pyNN import overridden_pacman_functions
-from spynnaker.pyNN import model_binaries
+from spynnaker.pyNN.models.utility_models import synapse_expander
+from spynnaker.pyNN import overridden_pacman_functions, model_binaries
 from spynnaker.pyNN.utilities import constants
-from spynnaker.pyNN.spynnaker_simulator_interface \
-    import SpynnakerSimulatorInterface
-from spynnaker import __version__ as version
-
-# general imports
-from six import add_metaclass
-import logging
-import math
-import os
-
-# global objects
+from spynnaker.pyNN.spynnaker_simulator_interface import (
+    SpynnakerSimulatorInterface)
 from spynnaker.pyNN.utilities.extracted_data import ExtractedData
+from spynnaker import __version__ as version
 
 logger = FormatAdapter(logging.getLogger(__name__))
 
@@ -70,6 +61,9 @@ class AbstractSpiNNakerCommon(AbstractSpinnakerBase,
         extra_algorithm_xml_path.append(os.path.join(
             os.path.dirname(overridden_pacman_functions.__file__),
             "algorithms_metadata.xml"))
+        extra_algorithm_xml_path.append(os.path.join(
+            os.path.dirname(synapse_expander.__file__),
+            "synapse_expander.xml"))
         if user_extra_algorithm_xml_path is not None:
             extra_algorithm_xml_path.extend(user_extra_algorithm_xml_path)
 
@@ -106,6 +100,7 @@ class AbstractSpiNNakerCommon(AbstractSpinnakerBase,
             extra_mapping_algorithms = []
         if extra_load_algorithms is None:
             extra_load_algorithms = []
+        extra_load_algorithms.append("SynapseExpander")
         extra_algorithms_pre_run = []
 
         if self.config.getboolean("Reports", "draw_network_graph"):
