@@ -53,6 +53,8 @@ class FixedNumberPreConnector(AbstractConnector):
         self._with_replacement = with_replacement
         self._verbose = verbose
         self._pre_neurons_set = False
+        self._conn_matrix = None
+
 
     def set_projection_information(
             self, pre_population, post_population, rng, machine_time_step):
@@ -78,6 +80,7 @@ class FixedNumberPreConnector(AbstractConnector):
         # If we haven't set the array up yet, do it now
         if not self._pre_neurons_set:
             self._pre_neurons = [None] * self._n_post_neurons
+            self._conn_matrix = numpy.zeros((self._n_pre_neurons,self._n_post_neurons), dtype=bool)
             self._pre_neurons_set = True
 
             # if verbose open a file to output the connectivity
@@ -113,6 +116,8 @@ class FixedNumberPreConnector(AbstractConnector):
 
                 # Sort the neurons now that we have them
                 self._pre_neurons[m].sort()
+
+                self._conn_matrix[self._pre_neurons[m],m]=1
 
                 # If verbose then output the list connected to this
                 # post-neuron

@@ -111,6 +111,7 @@ void c_main_store_provenance_data(address_t provenance_region){
     	spike_processing_get_ghost_pop_table_searches();
     io_printf (IO_BUF, "n_ghost_input_spikes=%d\n",spike_processing_get_ghost_pop_table_searches());
     io_printf (IO_BUF, "empty row count = %d\n",synapses_get_empty_row_count());
+    io_printf (IO_BUF, "nonzero row count = %d\n",synapses_get_nonzero_row_count());
     io_printf (IO_BUF, "dma_complete_count=%d\n",spike_processing_get_dma_complete_count());
     io_printf (IO_BUF, "spike_processing_count=%d\n",spike_processing_get_spike_processing_count());
     population_table_print_connectivity_lookup();
@@ -239,7 +240,7 @@ void timer_callback(uint timer_count, uint unused) {
     use(timer_count);
     use(unused);
 
-//    profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_TIMER);
+    profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_TIMER);
 
     time++;
     last_rewiring_time++;
@@ -314,6 +315,7 @@ void timer_callback(uint timer_count, uint unused) {
         count_rewires++;
     }
     // otherwise do synapse and neuron time step updates
+
     synapses_do_timestep_update(time);
     neuron_do_timestep_update(time);
 
@@ -322,7 +324,7 @@ void timer_callback(uint timer_count, uint unused) {
         recording_do_timestep_update(time);
     }
 
-//    profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_TIMER);
+    profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_TIMER);
 }
 
 //! \brief The entry point for this model.
