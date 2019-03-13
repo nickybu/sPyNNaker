@@ -7,6 +7,8 @@ from spynnaker.pyNN.models.neural_projections.connectors.one_to_one_connector \
     import OneToOneConnector
 from spynnaker.pyNN.models.neural_projections.connectors.from_list_connector \
     import FromListConnector
+from spynnaker.pyNN.models.neural_projections.connectors.fixed_number_pre_connector \
+    import FixedNumberPreConnector
 from spynnaker.pyNN.models.abstract_models \
     import AbstractWeightUpdatable, AbstractFilterableEdge
 from pacman.model.graphs.machine import MachineEdge

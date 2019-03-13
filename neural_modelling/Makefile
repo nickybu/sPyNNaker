@@ -3,7 +3,7 @@ BUILDS = spike_source/poisson \
          neuron \
          robot_motor_control \
          synapse_expander \
-         bit_field_expander
+         #bit_field_expander
 DIRS = $(BUILDS:%=makefiles/%)
 
 all: $(DIRS)

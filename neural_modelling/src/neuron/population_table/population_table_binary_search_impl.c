@@ -2,6 +2,8 @@
 #include <neuron/synapse_row.h>
 #include <debug.h>
 #include <bit_field.h>
+#include "profile_tags.h"
+#include <profiler.h>
 
 // bits in a word
 #define BITS_PER_WORD 32
@@ -42,6 +44,8 @@ static uint16_t next_item = 0;
 
 //! \brief how many items are left to go
 static uint16_t items_to_go = 0;
+
+static uint32_t bitfield_miss_count = 0;
 
 //! \brief pointer for the bitfield map
 bit_field_t* connectivity_bit_field;
@@ -207,7 +211,14 @@ bool population_table_get_first_address(
             if (!bit_field_test(
                     connectivity_bit_field[position],  last_neuron_id)){
                 log_debug("tested and wasnt set");
-                return false;
+//                log_info("tested and wasnt set");
+//                profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_INCOMING_SPIKE);
+//                profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_INCOMING_SPIKE);
+                  bitfield_miss_count++;
+//                return false;
+            }
+            else{
+                profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_PROCESS_FIXED_SYNAPSES);
             }
             log_debug("was set, carrying on");
         }
@@ -239,7 +250,7 @@ bool population_table_get_first_address(
         invalid_master_pop_hits ++;
     }
 
-    log_debug("Ghost searches: %u\n", ghost_pop_table_searches);
+    log_info("Ghost searches: %u\n", ghost_pop_table_searches);
     log_debug(
         "spike %u (= %x): population not found in master population table",
         spike, spike);
@@ -340,6 +351,10 @@ uint32_t population_table_get_invalid_master_pop_hits(){
 //! \param[in] connectivity_lookup: the connectivity lookup
 void population_table_set_connectivity_lookup(bit_field_t* connectivity_lookup){
     connectivity_bit_field = connectivity_lookup;
+}
+
+uint32_t population_table_get_bitfield_miss_count(void){
+    return bitfield_miss_count;
 }
 
 //! \brief clears the dtcm allocated by the population table.

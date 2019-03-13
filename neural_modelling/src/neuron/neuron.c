@@ -190,6 +190,7 @@ bool neuron_initialise(address_t address, uint32_t *n_neurons_value,
 
     log_debug("\t n_neurons = %u, spike buffer size = %u", n_neurons,
             *incoming_spike_buffer_size);
+    log_info("n_neurons = %u",n_neurons);
 
     // Call the neuron implementation initialise function to setup DTCM etc.
     if (!neuron_impl_initialise(n_neurons)) {

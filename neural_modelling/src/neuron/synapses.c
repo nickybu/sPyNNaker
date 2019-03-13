@@ -39,6 +39,7 @@ static uint32_t synapse_type_mask;
 
 //! the number of rows the DMA read which were empty.
 static uint32_t empty_row_count = 0;
+static uint32_t nonzero_row_count = 0;
 
 
 /* PRIVATE FUNCTIONS */
@@ -176,8 +177,14 @@ static inline void _process_fixed_synapses(
     // increment counter of rows that were empty (provenance data)
     if (fixed_synapse==0){
         empty_row_count++;
+//        log_info("empty row");
+//        profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_INCOMING_SPIKE);
+//        population_table_remove_connectivity_lookup_entry();
     }
-
+    else{
+        nonzero_row_count++;
+        profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_PROCESS_FIXED_SYNAPSES);
+    }
     num_fixed_pre_synaptic_events += fixed_synapse;
 
     for (; fixed_synapse > 0; fixed_synapse--) {
@@ -498,6 +505,11 @@ bool add_static_neuron_with_id(uint32_t id, address_t row, uint32_t weight,
 uint32_t synapses_get_empty_row_count(void){
     return empty_row_count;
 }
+
+uint32_t synapses_get_nonzero_row_count(void){
+    return nonzero_row_count;
+}
+
 
 //! \brief allows clearing of dtcm used by synapses
 //! \return bool true if successful false otherwise

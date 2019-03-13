@@ -126,6 +126,12 @@ void c_main_store_provenance_data(address_t provenance_region){
         spike_processing_get_dma_complete_count();
     provenance_region[SPIKE_PROGRESSING_COUNT] =
         spike_processing_get_spike_processing_count();
+    io_printf (IO_BUF, "n_ghost_input_spikes=%d\n",spike_processing_get_ghost_pop_table_searches());
+    io_printf (IO_BUF, "bitfield miss count = %d\n",population_table_get_bitfield_miss_count());
+    io_printf (IO_BUF, "empty row count = %d\n",synapses_get_empty_row_count());
+    io_printf (IO_BUF, "nonzero row count = %d\n",synapses_get_nonzero_row_count());
+    io_printf (IO_BUF, "dma_complete_count=%d\n",spike_processing_get_dma_complete_count());
+    io_printf (IO_BUF, "spike_processing_count=%d\n",spike_processing_get_spike_processing_count());
     log_debug("finished other provenance data");
 }
 
@@ -335,6 +341,7 @@ void timer_callback(uint timer_count, uint unused) {
     /* if a fixed number of simulation ticks that were specified at startup
        then do reporting for finishing */
     if (infinite_run != TRUE && time >= simulation_ticks) {
+
 
         // Enter pause and resume state to avoid another tick
         simulation_handle_pause_resume(resume_callback);
