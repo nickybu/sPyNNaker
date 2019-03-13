@@ -56,6 +56,7 @@ class FixedNumberPreConnector(AbstractConnector):
         self._conn_matrix = None
 
 
+
     def set_projection_information(
             self, pre_population, post_population, rng, machine_time_step):
         AbstractConnector.set_projection_information(

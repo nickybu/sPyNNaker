@@ -223,7 +223,8 @@ bool population_table_get_first_address(
             last_neuron_info.id_shift = 31-(last_neuron_id%32);
 	        if((connectivity_lookup[(imid*8)+last_neuron_info.w_index] & (uint32_t)1 << last_neuron_info.id_shift) == 0){
                 profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_INCOMING_SPIKE);
-	            //return false;//TODO:put this back after completing profile tests!
+                profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_INCOMING_SPIKE);
+	            return false;//TODO:put this back after completing profile tests!
 	        }
 	        else{
 	            profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_PROCESS_FIXED_SYNAPSES);

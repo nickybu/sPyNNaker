@@ -7,6 +7,8 @@ from spynnaker.pyNN.models.neural_projections.connectors.one_to_one_connector \
     import OneToOneConnector
 from spynnaker.pyNN.models.neural_projections.connectors.from_list_connector \
     import FromListConnector
+from spynnaker.pyNN.models.neural_projections.connectors.fixed_number_pre_connector \
+    import FixedNumberPreConnector
 from spynnaker.pyNN.models.abstract_models \
     import AbstractWeightUpdatable, AbstractFilterableEdge
 from pacman.model.graphs.machine import MachineEdge
@@ -44,20 +46,19 @@ class ProjectionMachineEdge(
                 post_hi = graph_mapper.get_slice(self.post_vertex).hi_atom
                 if pre_hi < post_lo or pre_lo > post_hi:
                     return True
-            elif isinstance(synapse_info.connector,FromListConnector):
+            elif isinstance(synapse_info.connector,FromListConnector) or isinstance(synapse_info.connector,FixedNumberPreConnector):
                 pre_lo = graph_mapper.get_slice(self.pre_vertex).lo_atom
                 pre_hi = graph_mapper.get_slice(self.pre_vertex).hi_atom
                 post_lo = graph_mapper.get_slice(self.post_vertex).lo_atom
                 post_hi = graph_mapper.get_slice(self.post_vertex).hi_atom
+                if isinstance(synapse_info.connector,FixedNumberPreConnector):
+                    synapse_info.connector._get_pre_neurons()
                 #run through connection list and return false if we find any connections between the pre and post vertices
                 try:
                     if synapse_info.connector._conn_matrix[pre_lo:pre_hi+1,post_lo:post_hi+1].max()>0:
                         return False
                 except ValueError:
                     print "Value error"
-                # for (pre,post,w,d) in synapse_info.connector.conn_list:
-                #     if (pre >= pre_lo and pre<=pre_hi) and (post>=post_lo and post<=post_hi):
-                #         return False
                 return True
         return False
 
