@@ -178,7 +178,7 @@ static inline void _process_fixed_synapses(
     if (fixed_synapse==0){
         empty_row_count++;
 //        log_info("empty row");
-//        profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_INCOMING_SPIKE);
+        profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_INCOMING_SPIKE);
 //        population_table_remove_connectivity_lookup_entry();
     }
     else{

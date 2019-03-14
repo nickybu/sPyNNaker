@@ -212,10 +212,10 @@ bool population_table_get_first_address(
                     connectivity_bit_field[position],  last_neuron_id)){
                 log_debug("tested and wasnt set");
 //                log_info("tested and wasnt set");
-//                profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_INCOMING_SPIKE);
-//                profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_INCOMING_SPIKE);
+                profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_INCOMING_SPIKE);
+                profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_INCOMING_SPIKE);
                   bitfield_miss_count++;
-//                return false;
+                return false;
             }
             else{
                 profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_PROCESS_FIXED_SYNAPSES);

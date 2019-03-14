@@ -39,6 +39,7 @@ from spynnaker.pyNN.utilities.constants \
 from spynnaker.pyNN.utilities.utility_calls \
     import get_maximum_probable_value, get_n_bits
 from spynnaker.pyNN.utilities.running_stats import RunningStats
+from spinnak_ear.spinnakear_vertex import SpiNNakEarVertex
 
 
 TIME_STAMP_BYTES = 4
@@ -230,6 +231,8 @@ class SynapticManager(object):
                         synapse_info, post_vertex_slice, in_edge,
                         machine_time_step)
                     n_atoms = in_edge.pre_vertex.n_atoms
+                    if isinstance(in_edge.pre_vertex,SpiNNakEarVertex):
+                        n_atoms = in_edge.pre_vertex._size
                     memory_size = self._poptable_type.get_next_allowed_address(
                         memory_size)
                     memory_size += max_row_info.undelayed_max_bytes * n_atoms
@@ -514,7 +517,22 @@ class SynapticManager(object):
         if weights_signed:
             max_weight_powers = (m + 1 for m in max_weight_powers)
 
-        return list(max_weight_powers)
+        if application_vertex.label is not None and "fixed_weight_scale" in application_vertex.label:  # isinstance(synapse_dynamics,SynapseDynamicsSTDP):# and isinstance(connector, AllToAllConnector):#
+            if "cond" in application_vertex.label:
+                output = [13, 13]
+            else:
+                # output = [4, 4] #scale by 2**11
+                output = [3, 3]  # scale by 2**12
+                # output = [2,2]#[1,1]#scale by 2*14 (w2s=2.0)
+                # output = [3, 0]  # same scaling as onetoone connections with a weight=w2s (producing nice STDP curves)
+                # output = list(max_weight_powers)#[4,0]#
+
+        else:
+            output = list(
+                max_weight_powers)  # [4, 4]  #TODO: investigate why there is a different SSP weight power caluculated for the first vertex
+
+        return output
+        # return list(max_weight_powers)
 
     @staticmethod
     def _get_weight_scale(ring_buffer_to_input_left_shift):
