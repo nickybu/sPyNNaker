@@ -6,27 +6,30 @@
 
 static uint32_t single_fixed_synapse[SIZE_OF_SINGLE_FIXED_SYNAPSE];
 
-bool direct_synapses_initialise(
-        address_t direct_matrix_address, address_t *direct_synapses_address){
+typedef struct direct_synapse_data_t {
+    uint32_t size;
+    uint32_t data[];
+} direct_synapse_data_t;
 
+bool direct_synapses_initialise(
+        void *direct_matrix_address, address_t *direct_synapses_address) {
+    const direct_synapse_data_t *matrix = direct_matrix_address;
     // Work out the positions of the direct and indirect synaptic matrices
     // and copy the direct matrix to DTCM
-    uint32_t direct_matrix_size = direct_matrix_address[0];
-    log_info("Direct matrix malloc size is %d", direct_matrix_size);
+    const uint32_t size = matrix->size;
+    log_info("Direct matrix malloc size is %d", size);
 
-    if (direct_matrix_size != 0) {
-        *direct_synapses_address = (address_t)spin1_malloc(direct_matrix_size);
-
-        if (*direct_synapses_address == NULL) {
+    if (size != 0) {
+        address_t direct_synapses = spin1_malloc(size);
+        if (direct_synapses == NULL) {
             log_error("Not enough memory to allocate direct matrix");
             return false;
         }
-        log_debug(
-            "Copying %u bytes of direct synapses to 0x%08x",
-            direct_matrix_size, *direct_synapses_address);
-        spin1_memcpy(
-            *direct_synapses_address, &(direct_matrix_address[1]),
-            direct_matrix_size);
+
+        *direct_synapses_address = direct_synapses;
+        log_debug("Copying %u bytes of direct synapses to 0x%08x",
+                size, direct_synapses);
+        spin1_memcpy(direct_synapses, matrix->data, size);
     }
 
     // Set up for single fixed synapses (data that is consistent per direct row)
