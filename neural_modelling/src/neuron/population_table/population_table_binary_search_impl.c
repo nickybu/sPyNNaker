@@ -186,6 +186,8 @@ bool population_table_get_first_address(
     log_debug("searching for key %d", spike);
     int position = population_table_position_in_the_master_pop_array(spike);
     log_debug("position = %d", position);
+    if (position==NOT_IN_MASTER_POP_TABLE_FLAG) log_info("spike 08%x not in mpt",spike);
+    bool bitfield_test;
 
     // check we don't have a complete miss
     if (position != NOT_IN_MASTER_POP_TABLE_FLAG){
@@ -212,13 +214,8 @@ bool population_table_get_first_address(
                     connectivity_bit_field[position],  last_neuron_id)){
                 log_debug("tested and wasnt set");
 //                log_info("tested and wasnt set");
-                profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_INCOMING_SPIKE);
-                profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_INCOMING_SPIKE);
-                  bitfield_miss_count++;
+                bitfield_miss_count++;
                 return false;
-            }
-            else{
-                profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_PROCESS_FIXED_SYNAPSES);
             }
             log_debug("was set, carrying on");
         }
@@ -243,6 +240,9 @@ bool population_table_get_first_address(
         // tracks surplus dmas
         if (!get_next){
             ghost_pop_table_searches ++;
+        }
+        else{
+            profiler_write_entry_disable_irq_fiq(PROFILER_ENTER | PROFILER_INCOMING_SPIKE);
         }
         return get_next;
     }

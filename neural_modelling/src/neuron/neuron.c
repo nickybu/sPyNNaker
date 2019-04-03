@@ -288,7 +288,7 @@ void recording_done_callback() {
 
 void neuron_do_timestep_update(timer_t time) {
 
-    // Wait a random number of clock cycles
+    /*// Wait a random number of clock cycles
     uint32_t random_backoff_time = tc[T1_COUNT] - random_backoff;
     while (tc[T1_COUNT] > random_backoff_time) {
 
@@ -296,7 +296,7 @@ void neuron_do_timestep_update(timer_t time) {
     }
 
     // Set the next expected time to wait for between spike sending
-    expected_time = tc[T1_COUNT] - time_between_spikes;
+    expected_time = tc[T1_COUNT] - time_between_spikes;*/
 
     // Wait until recordings have completed, to ensure the recording space
     // can be re-written
@@ -342,12 +342,12 @@ void neuron_do_timestep_update(timer_t time) {
 
             if (use_key) {
 
-                // Wait until the expected time to send
+                /*// Wait until the expected time to send
                 while (tc[T1_COUNT] > expected_time) {
 
                     // Do Nothing
                 }
-                expected_time -= time_between_spikes;
+                expected_time -= time_between_spikes;*/
 
                 // Send the spike
                 while (!spin1_send_mc_packet(

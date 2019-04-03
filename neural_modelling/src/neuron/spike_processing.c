@@ -133,8 +133,8 @@ void _setup_synaptic_dma_read() {
     }
     spin1_mode_restore(cpsr);
 
-    // increment the spike count for provenance generation
-    spike_processing_count++;
+//    // increment the spike count for provenance generation
+//    spike_processing_count++;
 }
 
 static inline void _setup_synaptic_dma_write(uint32_t dma_buffer_index) {
@@ -168,6 +168,8 @@ void _multicast_packet_received_callback(uint key, uint payload) {
 
     // If there was space to add spike to incoming spike queue
     if (in_spikes_add_spike(key)) {
+        // increment the spike count for provenance generation
+        spike_processing_count++;
 
         // If we're not already processing synaptic DMAs,
         // flag pipeline as busy and trigger a feed event

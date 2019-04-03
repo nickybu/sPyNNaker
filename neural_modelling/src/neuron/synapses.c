@@ -178,12 +178,11 @@ static inline void _process_fixed_synapses(
     if (fixed_synapse==0){
         empty_row_count++;
 //        log_info("empty row");
-        profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_INCOMING_SPIKE);
 //        population_table_remove_connectivity_lookup_entry();
     }
     else{
         nonzero_row_count++;
-        profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_PROCESS_FIXED_SYNAPSES);
+//        profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_PROCESS_FIXED_SYNAPSES);
     }
     num_fixed_pre_synaptic_events += fixed_synapse;
 
@@ -221,6 +220,9 @@ static inline void _process_fixed_synapses(
         // Store saturated value back in ring-buffer
         ring_buffers[ring_buffer_index] = accumulation;
     }
+
+    profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_INCOMING_SPIKE);
+
 }
 
 //! private method for doing output debug data on the synapses
@@ -355,15 +357,14 @@ bool synapses_process_synaptic_row(uint32_t time, synaptic_row_t row,
         address_t plastic_region_address = synapse_row_plastic_region(row);
 
         // Process any plastic synapses
-        profiler_write_entry_disable_fiq(
-            PROFILER_ENTER | PROFILER_PROCESS_PLASTIC_SYNAPSES);
+        //profiler_write_entry_disable_fiq(
+        //   PROFILER_ENTER | PROFILER_PROCESS_PLASTIC_SYNAPSES);
         if (!synapse_dynamics_process_plastic_synapses(plastic_region_address,
                 fixed_region_address, ring_buffers, time)) {
             return false;
         }
-        profiler_write_entry_disable_fiq(
-            PROFILER_EXIT | PROFILER_PROCESS_PLASTIC_SYNAPSES);
-
+        //profiler_write_entry_disable_fiq(
+        //    PROFILER_EXIT | PROFILER_PROCESS_PLASTIC_SYNAPSES);
 
         // Perform DMA write back
         if (write) {
