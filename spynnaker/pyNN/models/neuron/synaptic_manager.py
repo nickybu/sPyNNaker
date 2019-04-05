@@ -509,6 +509,7 @@ class SynapticManager(object):
 
         max_weight_powers = (4 if w >= 1 else w
                              for w in max_weight_powers)
+        print "####"
 
         # If we have synapse dynamics that uses signed weights,
         # Add another bit of shift to prevent overflows
@@ -884,11 +885,14 @@ class SynapticManager(object):
             weight_scale):
         """ Get the ring buffer shifts for this vertex
         """
+        print "synaptic input buffer shifts bef: {}".format(self._ring_buffer_shifts)
+
         if self._ring_buffer_shifts is None:
             self._ring_buffer_shifts = \
                 self._get_ring_buffer_to_input_left_shifts(
                     application_vertex, application_graph, machine_timestep,
                     weight_scale)
+        print "synaptic input buffer shifts aft: {}".format(self._ring_buffer_shifts)
         return self._ring_buffer_shifts
 
     def write_data_spec(
