@@ -78,6 +78,9 @@ uint32_t deactivation_time = 0;
 //! the timer tick callback returning the same value.
 uint32_t time;
 
+static uint32_t timer_period;
+static uint32_t timer_offset;
+
 //! The number of timer ticks to run for before being expected to exit
 static uint32_t simulation_ticks = 0;
 
@@ -137,7 +140,7 @@ void c_main_store_provenance_data(address_t provenance_region){
 //! \param[in] timer_period a pointer for the memory address where the timer
 //!            period should be stored during the function.
 //! \return True if it successfully initialised, false otherwise
-static bool initialise(uint32_t *timer_period) {
+static bool initialise() {
     log_debug("Initialise: started");
 
     // Get the address this core's DTCM data starts at from SRAM
@@ -151,7 +154,7 @@ static bool initialise(uint32_t *timer_period) {
     // Get the timing details and set up the simulation interface
     if (!simulation_initialise(
             data_specification_get_region(SYSTEM_REGION, address),
-            APPLICATION_NAME_HASH, timer_period, &simulation_ticks,
+            APPLICATION_NAME_HASH, &timer_period, &simulation_ticks,
             &infinite_run, SDP, DMA)) {
         return false;
     }
@@ -171,7 +174,8 @@ static bool initialise(uint32_t *timer_period) {
     uint32_t incoming_spike_buffer_size;
     if (!neuron_initialise(
             data_specification_get_region(NEURON_PARAMS_REGION, address),
-            &n_neurons, &n_synapse_types, &incoming_spike_buffer_size)) {
+            &n_neurons, &n_synapse_types, &incoming_spike_buffer_size,
+            &timer_offset)) {
         return false;
     }
 
@@ -261,7 +265,6 @@ void resume_callback() {
 //! \param[in] unused unused parameter kept for API consistency
 //! \return None
 void timer_callback(uint timer_count, uint unused) {
-    use(timer_count);
     use(unused);
 
     // Get number of spikes in last tick, and reset spike counter
@@ -364,7 +367,7 @@ void timer_callback(uint timer_count, uint unused) {
     }
     // otherwise do synapse and neuron time step updates
     synapses_do_timestep_update(time);
-    neuron_do_timestep_update(time);
+    neuron_do_timestep_update(time, timer_count, timer_period);
 
     // trigger buffering_out_mechanism
     if (recording_flags > 0) {
@@ -378,11 +381,8 @@ void timer_callback(uint timer_count, uint unused) {
 //! \brief The entry point for this model.
 void c_main(void) {
 
-    // Load DTCM data
-    uint32_t timer_period;
-
     // initialise the model
-    if (!initialise(&timer_period)){
+    if (!initialise()){
         rt_error(RTE_API);
     }
 
@@ -392,7 +392,7 @@ void c_main(void) {
     // Set timer tick (in microseconds)
     log_debug("setting timer tick callback for %d microseconds",
               timer_period);
-    spin1_set_timer_tick(timer_period);
+    spin1_set_timer_tick_and_phase(timer_period, timer_offset);
 
     // Set up the timer tick callback (others are handled elsewhere)
     spin1_callback_on(TIMER_TICK, timer_callback, TIMER);
