@@ -330,7 +330,7 @@ void neuron_do_timestep_update(
         bool spike = neuron_impl_do_timestep_update(
             neuron_index, external_bias, recorded_variable_values);
 
-        recorded_variable_values[0] = (200000 - temp_timer_callback_completed) >> 4;
+        recorded_variable_values[0] = (20000000 - temp_timer_callback_completed) >> 4;
         recorded_variable_values[1] = last_spikes;
         recorded_variable_values[2] = last_restarts;
 
