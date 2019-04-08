@@ -66,7 +66,7 @@ uint32_t max_spikes_in_a_tick = 0;
 uint32_t max_dmas_in_a_tick = 0;
 uint32_t max_pipeline_restarts = 0;
 
-uint32_t timer_callback_completed = 0;
+uint32_t timer_callback_completed = 20000000;
 uint32_t temp_timer_callback_completed = 0;
 uint32_t spike_pipeline_deactivated = 0;
 
