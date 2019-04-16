@@ -24,6 +24,7 @@
 #include "plasticity/synapse_dynamics.h"
 #include "structural_plasticity/synaptogenesis_dynamics.h"
 #include "profile_tags.h"
+#include "spike_profiling.h"
 
 #include <data_specification.h>
 #include <simulation.h>
@@ -73,6 +74,10 @@ uint32_t spike_pipeline_deactivated = 0;
 uint32_t last_spikes = 0;
 uint32_t last_restarts = 0;
 uint32_t deactivation_time = 0;
+
+struct spike_holder_t spike_counter;
+struct spike_holder_t spike_cache;
+
 
 //! the current timer tick value
 //! the timer tick callback returning the same value.
@@ -273,6 +278,10 @@ void timer_callback(uint timer_count, uint unused) {
     last_restarts =
     		spike_processing_get_and_reset_pipeline_restarts_this_tick();
     deactivation_time = spike_processing_get_pipeline_deactivation_time();
+
+    // cache and flush spike counters
+	spike_profiling_cache_and_flush_spike_holder(&spike_counter,
+			&spike_cache);
 
     if (last_spikes > max_spikes_in_a_tick){
     	max_spikes_in_a_tick = last_spikes;

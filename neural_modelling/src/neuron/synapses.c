@@ -2,10 +2,13 @@
 #include "spike_processing.h"
 #include "neuron.h"
 #include "plasticity/synapse_dynamics.h"
+#include "spike_profiling.h"
+
 #include <profiler.h>
 #include <debug.h>
 #include <spin1_api.h>
 #include <utils.h>
+
 
 //! if using profiler import profiler tags
 #ifdef PROFILER_ENABLED
@@ -37,6 +40,8 @@ static uint32_t synapse_index_mask;
 static uint32_t synapse_type_bits;
 static uint32_t synapse_type_mask;
 
+
+extern struct spike_holder_t spike_counter;
 
 /* PRIVATE FUNCTIONS */
 
@@ -150,6 +155,9 @@ static inline void _process_fixed_synapses(
         fixed_region_address);
 
     num_fixed_pre_synaptic_events += fixed_synapse;
+
+    // Add contribution to spike counter
+    spike_profiling_add_count(fixed_synapse, &spike_counter);
 
     for (; fixed_synapse > 0; fixed_synapse--) {
 

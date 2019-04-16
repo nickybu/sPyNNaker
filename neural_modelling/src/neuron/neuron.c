@@ -7,6 +7,8 @@
 #include "neuron.h"
 #include "implementations/neuron_impl.h"
 #include "plasticity/synapse_dynamics.h"
+#include "spike_profiling.h"
+
 #include <common/out_spikes.h>
 #include <debug.h>
 
@@ -78,6 +80,9 @@ static uint32_t n_recordings_outstanding = 0;
 extern uint32_t last_spikes;
 extern uint32_t last_restarts;
 extern uint32_t temp_timer_callback_completed;
+
+extern struct spike_holder_t spike_cache;
+
 
 //! parameters that reside in the neuron_parameter_data_region in human
 //! readable form
@@ -330,9 +335,11 @@ void neuron_do_timestep_update(
         bool spike = neuron_impl_do_timestep_update(
             neuron_index, external_bias, recorded_variable_values);
 
-        recorded_variable_values[0] = kbits(temp_timer_callback_completed);
-        recorded_variable_values[1] = last_spikes;
-        recorded_variable_values[2] = last_restarts;
+
+		recorded_variable_values[0] = spike_profiling_get_spike_holder_as_accum(
+				spike_cache);
+		recorded_variable_values[1] = last_spikes;
+		recorded_variable_values[2] = last_restarts;
 
         // Write the recorded variable values
         for (uint32_t i = 0; i < n_recorded_vars; i++) {

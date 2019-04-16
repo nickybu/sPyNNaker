@@ -43,6 +43,7 @@ uint32_t pipeline_restarts_this_tick = 0;
 uint32_t spike_pipeline_deactivation_time = 0;
 
 
+
 /* PRIVATE FUNCTIONS - static for inlining */
 
 static inline void _do_dma_read(
