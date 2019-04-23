@@ -126,7 +126,7 @@ class AbstractSpiNNakerCommon(AbstractSpinnakerBase,
             timestep, min_delay, max_delay, self.config, time_scale_factor)
         self.set_up_machine_specifics(hostname)
 
-        logger.info("Setting time scale factor to {}.",
+        logger.info("Setting THE time scale factor to {}.",
                     self._time_scale_factor)
 
         # get the machine time step
