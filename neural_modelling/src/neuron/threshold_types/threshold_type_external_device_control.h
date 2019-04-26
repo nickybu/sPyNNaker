@@ -22,7 +22,7 @@ typedef struct threshold_type_t {
     // The key to send to update the value
     uint32_t key;
 
-    // True (1) if the value is to be sent as payload, False (0) if just the key
+    // A scaling factor (>0) if the value is to be sent as payload, False (0) if just the key
     uint32_t value_as_payload;
 
     // The minimum allowed value to send as the payload.
