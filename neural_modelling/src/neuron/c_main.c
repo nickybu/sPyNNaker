@@ -38,11 +38,9 @@
 #endif
 
 typedef enum extra_provenance_data_region_entries{
-    NUMBER_OF_PRE_SYNAPTIC_EVENT_COUNT = 0,
-    SYNAPTIC_WEIGHT_SATURATION_COUNT = 1,
-    INPUT_BUFFER_OVERFLOW_COUNT = 2,
-    CURRENT_TIMER_TICK = 3,
-    PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT = 4
+    CURRENT_TIMER_TICK = 0,
+    MAX_TIME = 1,
+    MIN_TIME = 2
 } extra_provenance_data_region_entries;
 
 //! values for the priority for each callback
@@ -83,6 +81,9 @@ bool rewiring = false;
 // FOR DEBUGGING!
 uint32_t count_rewires = 0;
 
+uint32_t max_time = 0;
+uint32_t min_time = UINT32_MAX;
+
 
 //! \brief Initialises the recording parts of the model
 //! \param[in] recording_address: the address in SDRAM where to store
@@ -98,6 +99,8 @@ void c_main_store_provenance_data(address_t provenance_region){
     log_debug("writing other provenance data");
 
     provenance_region[CURRENT_TIMER_TICK] = time;
+    provenance_region[MAX_TIME] = max_time;
+    provenance_region[MIN_TIME] = min_time;
     log_debug("finished other provenance data");
 }
 
@@ -263,6 +266,17 @@ void timer_callback(uint timer_count, uint unused) {
     }
 
     profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_TIMER);
+
+    uint32_t tmp_time =  tc[T1_COUNT];
+
+    if(tmp_time > max_time) {
+
+        max_time = tmp_time;
+    }
+    else if(tmp_time < min_time) {
+
+        min_time = tmp_time;
+    }
 }
 
 //! \brief The entry point for this model.

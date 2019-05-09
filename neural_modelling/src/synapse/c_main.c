@@ -42,7 +42,12 @@ typedef enum extra_provenance_data_region_entries{
     SYNAPTIC_WEIGHT_SATURATION_COUNT = 1,
     INPUT_BUFFER_OVERFLOW_COUNT = 2,
     CURRENT_TIMER_TICK = 3,
-    PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT = 4
+    PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT = 4,
+    MAX_SPIKES_BETWEEN_TIMER_EVENTS = 5,
+    MAX_DMAS_BETWEEN_TIMER_EVENTS = 6,
+    MAX_SPIKE_PIPELINE_RESTARTS_BETWEEN_TIMER_EVENTS = 7,
+    TIMER_CALLBACK_COMPLETED = 8,
+    SPIKE_PIPELINE_DEACTIVATED = 9
 } extra_provenance_data_region_entries;
 
 //! values for the priority for each callback
@@ -75,6 +80,16 @@ static uint32_t timer_period;
 uint32_t count_rewires = 0;
 
 
+// Counters to assess maximum spikes per timer tick
+uint32_t max_spikes_in_a_tick = 0;
+uint32_t max_dmas_in_a_tick = 0;
+uint32_t max_pipeline_restarts = 0;
+
+uint32_t timer_callback_completed = 20000000;
+uint32_t temp_timer_callback_completed = 0;
+uint32_t spike_pipeline_deactivated = 0;
+
+
 void c_main_store_provenance_data(address_t provenance_region){
     log_debug("writing other provenance data");
 
@@ -88,6 +103,12 @@ void c_main_store_provenance_data(address_t provenance_region){
     provenance_region[CURRENT_TIMER_TICK] = time;
     provenance_region[PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT] =
             synapse_dynamics_get_plastic_saturation_count();
+    provenance_region[MAX_SPIKES_BETWEEN_TIMER_EVENTS] = max_spikes_in_a_tick;
+    provenance_region[MAX_DMAS_BETWEEN_TIMER_EVENTS] = max_dmas_in_a_tick;
+    provenance_region[MAX_SPIKE_PIPELINE_RESTARTS_BETWEEN_TIMER_EVENTS]
+					  = max_pipeline_restarts;
+    provenance_region[TIMER_CALLBACK_COMPLETED] = timer_callback_completed;
+    provenance_region[SPIKE_PIPELINE_DEACTIVATED] = spike_pipeline_deactivated;
     log_debug("finished other provenance data");
 }
 
@@ -206,6 +227,24 @@ void timer_callback(uint timer_count, uint unused) {
     use(timer_count);
     use(unused);
 
+    last_spikes = spike_processing_get_and_reset_spikes_this_tick();
+    uint32_t last_dmas = spike_processing_get_and_reset_dmas_this_tick();
+    last_restarts =
+    		spike_processing_get_and_reset_pipeline_restarts_this_tick();
+    deactivation_time = spike_processing_get_pipeline_deactivation_time();
+
+    // cache and flush spike counters
+	spike_profiling_cache_and_flush_spike_holder(&spike_counter,
+			&spike_cache);
+
+    if (last_spikes > max_spikes_in_a_tick){
+    	max_spikes_in_a_tick = last_spikes;
+    	max_dmas_in_a_tick = last_dmas;
+    	max_pipeline_restarts = last_restarts;
+    	timer_callback_completed = temp_timer_callback_completed;
+    	spike_pipeline_deactivated = deactivation_time;
+    }
+
     //Schedule event 20 microseconds before the end of the timer period
     if(!timer_schedule_proc(write_contributions, 0, 0, timer_period-20)) {
 
@@ -249,6 +288,7 @@ void timer_callback(uint timer_count, uint unused) {
         return;
     }
 
+    temp_timer_callback_completed = tc[T1_COUNT];
     profiler_write_entry_disable_irq_fiq(PROFILER_EXIT | PROFILER_TIMER);
 }
 

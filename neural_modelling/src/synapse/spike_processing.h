@@ -63,4 +63,20 @@ bool received_any_spike();
 //! \return number of flushed spikes
 uint32_t spike_processing_flush_in_buffer();
 
+//! \brief get number of spikes received since last timer event
+//! \return uint32_t number of spikes
+uint32_t spike_processing_get_and_reset_spikes_this_tick();
+
+//! \brief get number of dmas completed since last timer event
+//! \return uint32_t number of DMAs
+uint32_t spike_processing_get_and_reset_dmas_this_tick();
+
+//! \brief get number of time pipeline was restarted since last timer event
+//! \return uint32_t number of pipeline restarts
+uint32_t spike_processing_get_and_reset_pipeline_restarts_this_tick();
+
+//! \brief get time from T1 clock at which spike pipeline completed
+//! \return uint32_t pipeline deactivation time
+uint32_t spike_processing_get_pipeline_deactivation_time();
+
 #endif // _SPIKE_PROCESSING_H_

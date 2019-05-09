@@ -36,6 +36,14 @@ static uint32_t single_fixed_synapse[4];
 uint32_t number_of_rewires=0;
 bool any_spike = false;
 
+// counter for number of spikes between timer events
+uint32_t spikes_this_tick = 0;
+uint32_t dmas_this_tick = 0;
+uint32_t pipeline_restarts_this_tick = 0;
+uint32_t spike_pipeline_deactivation_time = 0;
+
+
+
 
 /* PRIVATE FUNCTIONS - static for inlining */
 
@@ -158,6 +166,8 @@ void _multicast_packet_received_callback(uint key, uint payload) {
     any_spike = true;
     log_debug("Received spike %x at %d, DMA Busy = %d", key, time, dma_busy);
 
+    spikes_this_tick++;
+
     // If there was space to add spike to incoming spike queue
     if (in_spikes_add_spike(key)) {
 
@@ -182,12 +192,15 @@ void _user_event_callback(uint unused0, uint unused1) {
     use(unused0);
     use(unused1);
 
+    pipeline_restarts_this_tick++;
     _setup_synaptic_dma_read();
 }
 
 // Called when a DMA completes
 void _dma_complete_callback(uint unused, uint tag) {
     use(unused);
+
+    dmas_this_tick++;
 
     log_debug("DMA transfer complete with tag %u", tag);
 
@@ -320,4 +333,31 @@ bool received_any_spike() {
 uint32_t spike_processing_flush_in_buffer() {
 
     return in_spikes_flush_buffer();
+}
+
+uint32_t spike_processing_get_and_reset_spikes_this_tick(){
+
+	uint32_t spikes_to_return = spikes_this_tick;
+	spikes_this_tick = 0;
+
+	return spikes_to_return;
+}
+
+uint32_t spike_processing_get_and_reset_dmas_this_tick(){
+
+	uint32_t dmas_to_return = dmas_this_tick;
+	dmas_this_tick = 0;
+
+	return dmas_to_return;
+}
+
+uint32_t spike_processing_get_and_reset_pipeline_restarts_this_tick(){
+	uint32_t pipeline_restarts_to_return = pipeline_restarts_this_tick;
+	pipeline_restarts_this_tick = 0;
+
+	return pipeline_restarts_to_return;
+}
+
+uint32_t spike_processing_get_pipeline_deactivation_time(){
+	return spike_pipeline_deactivation_time;
 }

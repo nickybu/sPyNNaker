@@ -36,7 +36,12 @@ class SynapseMachineVertex(
                ("SATURATION_COUNT", 1),
                ("BUFFER_OVERFLOW_COUNT", 2),
                ("CURRENT_TIMER_TIC", 3),
-               ("PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT", 4)])
+               ("PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT", 4),
+               ("MAX_SPIKES_BETWEEN_TIMER_EVENTS", 5),
+               ("MAX_DMAS_BETWEEN_TIMER_EVENTS", 6),
+               ("MAX_SPIKE_PIPELINE_RESTARTS_BETWEEN_TIMER_EVENTS", 7),
+               ("TIMER_CALLBACK_COMPLETED", 8),
+               ("SPIKE_PIPELINE_DEACTIVATED", 9)])
 
     PROFILE_TAG_LABELS = {
         0: "TIMER",
