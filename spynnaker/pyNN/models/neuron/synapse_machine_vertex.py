@@ -123,6 +123,21 @@ class SynapseMachineVertex(
         n_plastic_saturations = provenance_data[
             self.EXTRA_PROVENANCE_DATA_ENTRIES.
             PLASTIC_SYNAPTIC_WEIGHT_SATURATION_COUNT.value]
+        max_spikes_in_a_tick = provenance_data[
+            self.EXTRA_PROVENANCE_DATA_ENTRIES.
+                MAX_SPIKES_BETWEEN_TIMER_EVENTS.value]
+        max_dmas_in_a_tick = provenance_data[
+            self.EXTRA_PROVENANCE_DATA_ENTRIES.
+                MAX_DMAS_BETWEEN_TIMER_EVENTS.value]
+        max_pipeline_restarts_between_ticks = provenance_data[
+            self.EXTRA_PROVENANCE_DATA_ENTRIES.
+                MAX_SPIKE_PIPELINE_RESTARTS_BETWEEN_TIMER_EVENTS.value]
+        timer_callback_complete = provenance_data[
+            self.EXTRA_PROVENANCE_DATA_ENTRIES.
+                TIMER_CALLBACK_COMPLETED.value]
+        spike_pipeline_deactivated = provenance_data[
+            self.EXTRA_PROVENANCE_DATA_ENTRIES.
+                SPIKE_PIPELINE_DEACTIVATED.value]
 
         label, x, y, p, names = self._get_placement_details(placement)
 
@@ -165,6 +180,18 @@ class SynapseMachineVertex(
                 "spikes_per_second and / or ring_buffer_sigma values located "
                 "within the .spynnaker.cfg file.".format(
                     label, x, y, p, n_plastic_saturations))))
+
+        provenance_items.append(ProvenanceDataItem(
+            self._add_name(names, "Max_spikes_in_a_tick"),
+            max_spikes_in_a_tick,
+            report=max_spikes_in_a_tick > -1,
+            message=(
+                "Max spikes, dmas, pipeline_kickstarts, syn_events between timer "
+                "events, pipeline deactivated, timer_callback complete, for {} on {}, {}, {}, was: \n {}, {}, {}, {}, {}, {}".format(
+                    label, x, y, p,
+                    max_spikes_in_a_tick, max_dmas_in_a_tick,
+                    max_pipeline_restarts_between_ticks, n_pre_synaptic_events,
+                    spike_pipeline_deactivated, timer_callback_complete))))
 
         return provenance_items
 

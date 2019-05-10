@@ -89,6 +89,10 @@ uint32_t timer_callback_completed = 20000000;
 uint32_t temp_timer_callback_completed = 0;
 uint32_t spike_pipeline_deactivated = 0;
 
+uint32_t last_spikes = 0;
+uint32_t last_restarts = 0;
+uint32_t deactivation_time = 0;
+
 
 void c_main_store_provenance_data(address_t provenance_region){
     log_debug("writing other provenance data");
@@ -233,9 +237,6 @@ void timer_callback(uint timer_count, uint unused) {
     		spike_processing_get_and_reset_pipeline_restarts_this_tick();
     deactivation_time = spike_processing_get_pipeline_deactivation_time();
 
-    // cache and flush spike counters
-	spike_profiling_cache_and_flush_spike_holder(&spike_counter,
-			&spike_cache);
 
     if (last_spikes > max_spikes_in_a_tick){
     	max_spikes_in_a_tick = last_spikes;

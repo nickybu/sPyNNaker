@@ -107,12 +107,22 @@ class PopulationMachineVertex(
 
         last_timer_tick = provenance_data[
             self.EXTRA_PROVENANCE_DATA_ENTRIES.CURRENT_TIMER_TIC.value]
+        min_time = provenance_data[
+            self.EXTRA_PROVENANCE_DATA_ENTRIES.MIN_TIME.value]
+        max_time = provenance_data[
+            self.EXTRA_PROVENANCE_DATA_ENTRIES.MAX_TIME.value]
 
         label, x, y, p, names = self._get_placement_details(placement)
 
         provenance_items.append(ProvenanceDataItem(
             self._add_name(names, "Last_timer_tic_the_core_ran_to"),
             last_timer_tick))
+        provenance_items.append(ProvenanceDataItem(
+            self._add_name(names, "Min_idle_time"),
+            min_time))
+        provenance_items.append(ProvenanceDataItem(
+            self._add_name(names, "Max_idle_time"),
+            max_time))
 
         return provenance_items
 
