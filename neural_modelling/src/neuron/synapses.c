@@ -153,8 +153,10 @@ static inline void _process_fixed_synapses(address_t fixed_region_address,
 
 	num_fixed_pre_synaptic_events += fixed_synapse;
 
-	// Add contribution to spike counter
-	spike_profiling_add_count(fixed_synapse, &spike_counter); // when recording total spikes into core
+
+//	// When doing total count (now deprecated)
+//	// Add contribution to spike counter
+//	spike_profiling_add_count(fixed_synapse, &spike_counter); // when recording total spikes into core
 
 	if (fixed_synapse > 0) {
 		uint32_t synaptic_word = *synaptic_words;
