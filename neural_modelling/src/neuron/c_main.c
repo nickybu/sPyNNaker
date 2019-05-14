@@ -77,7 +77,8 @@ uint32_t deactivation_time = 0;
 
 struct spike_holder_t spike_counter;
 struct spike_holder_t spike_cache;
-
+struct spike_holder_t spike_counter_inh;
+struct spike_holder_t spike_cache_inh;
 
 //! the current timer tick value
 //! the timer tick callback returning the same value.
@@ -282,6 +283,8 @@ void timer_callback(uint timer_count, uint unused) {
     // cache and flush spike counters
 	spike_profiling_cache_and_flush_spike_holder(&spike_counter,
 			&spike_cache);
+	spike_profiling_cache_and_flush_spike_holder(&spike_counter_inh,
+			&spike_cache_inh);
 
     if (last_spikes > max_spikes_in_a_tick){
     	max_spikes_in_a_tick = last_spikes;

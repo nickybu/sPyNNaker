@@ -82,6 +82,7 @@ extern uint32_t last_restarts;
 extern uint32_t temp_timer_callback_completed;
 
 extern struct spike_holder_t spike_cache;
+extern struct spike_holder_t spike_cache_inh;
 
 
 //! parameters that reside in the neuron_parameter_data_region in human
@@ -339,7 +340,8 @@ void neuron_do_timestep_update(
 		recorded_variable_values[0] = spike_profiling_get_spike_holder_as_accum(
 				spike_cache);
 		recorded_variable_values[1] = last_spikes;
-		recorded_variable_values[2] = last_restarts;
+		recorded_variable_values[2] = spike_profiling_get_spike_holder_as_accum(
+				spike_cache_inh);
 
         // Write the recorded variable values
         for (uint32_t i = 0; i < n_recorded_vars; i++) {
