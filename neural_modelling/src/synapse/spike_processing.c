@@ -95,7 +95,6 @@ void _setup_synaptic_dma_read() {
             // This is a direct row to process
             if (n_bytes_to_transfer == 0) {
 
-                io_printf(IO_BUF, "prev spike\n");
                 _do_direct_row(row_address);
             } else {
                 _do_dma_read(row_address, n_bytes_to_transfer);
@@ -115,7 +114,6 @@ void _setup_synaptic_dma_read() {
                     spike, &row_address, &n_bytes_to_transfer)) {
                 // This is a direct row to process
                 if (n_bytes_to_transfer == 0) {
-                    io_printf(IO_BUF, "more spikes\n");
                     _do_direct_row(row_address);
                 } else {
                     _do_dma_read(row_address, n_bytes_to_transfer);
@@ -221,7 +219,6 @@ void _dma_complete_callback(uint unused, uint tag) {
         subsequent_spikes = in_spikes_is_next_spike_equal(
             current_buffer->originating_spike);
 
-        io_printf(IO_BUF, "DMA Comp cb\n");
 
         // Process synaptic row, writing it back if it's the last time
         // it's going to be processed
