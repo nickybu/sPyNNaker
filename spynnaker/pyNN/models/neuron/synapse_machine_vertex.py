@@ -184,14 +184,15 @@ class SynapseMachineVertex(
         provenance_items.append(ProvenanceDataItem(
             self._add_name(names, "Max_spikes_in_a_tick"),
             max_spikes_in_a_tick,
-            report=max_spikes_in_a_tick > -1,
-            message=(
-                "Max spikes, dmas, pipeline_kickstarts, syn_events between timer "
-                "events, pipeline deactivated, timer_callback complete, for {} on {}, {}, {}, was: \n {}, {}, {}, {}, {}, {}".format(
-                    label, x, y, p,
-                    max_spikes_in_a_tick, max_dmas_in_a_tick,
-                    max_pipeline_restarts_between_ticks, n_pre_synaptic_events,
-                    spike_pipeline_deactivated, timer_callback_complete))))
+            #report=max_spikes_in_a_tick > -1,
+            #message=(
+            #    "Max spikes, dmas, pipeline_kickstarts, syn_events between timer "
+            #    "events, pipeline deactivated, timer_callback complete, for {} on {}, {}, {}, was: \n {}, {}, {}, {}, {}, {}".format(
+            #        label, x, y, p,
+            #        max_spikes_in_a_tick, max_dmas_in_a_tick,
+            #        max_pipeline_restarts_between_ticks, n_pre_synaptic_events,
+            #        spike_pipeline_deactivated, timer_callback_complete)))
+        ))
 
         return provenance_items
 
