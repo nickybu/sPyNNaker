@@ -95,7 +95,7 @@ class MultiSpikeRecorder(object):
             time, n_blocks = _TWO_WORDS.unpack_from(raw_data, offset)
             offset += _TWO_WORDS.size
             spike_data = numpy.frombuffer(
-                raw_data, dtype="uint8",
+                bytearray(raw_data), dtype="uint8",
                 count=n_bytes_per_block * n_blocks, offset=offset)
             offset += n_bytes_per_block * n_blocks
 
