@@ -686,7 +686,9 @@ class SynapticManager(
         if weights_signed:
             max_weight_powers = (m + 1 for m in max_weight_powers)
 
-        return list(max_weight_powers)
+        return [list(max_weight_powers)[self._synapse_index]]
+
+        #return list(max_weight_powers)
 
     @staticmethod
     def _get_weight_scale(ring_buffer_to_input_left_shift):
