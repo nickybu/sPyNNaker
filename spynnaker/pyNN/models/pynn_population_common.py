@@ -562,7 +562,7 @@ class PyNNPopulationCommon(object):
         if len(self._vertex) > 0:
             return self._vertex[1:len(self._vertex)]
         raise ConfigurationException(
-            "There are not synapse vertices")
+            "No synapse vertices")
 
     @property
     def _internal_delay_vertex(self):

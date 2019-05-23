@@ -48,12 +48,18 @@ class PyNNProjectionCommon(object):
             .get_synapse_id_by_target(target)
 
         pre_vertex = pre_synaptic_population.get_neuron_vertex
-        post_vertex = post_synaptic_population.get_syn_vertices[synapse_type]
+
+        if post_synaptic_population.get_neuron_vertex.get_n_synapse_types > 1 and synapse_type == 0:
+            post_vertex = [post_synaptic_population.get_syn_vertices[synapse_type], post_synaptic_population.get_syn_vertices[synapse_type+1]]
+        else:
+            post_vertex = [post_synaptic_population.get_syn_vertices[synapse_type]]
 
         if synapse_type is None:
             raise ConfigurationException(
                 "Synapse target {} not found in {}".format(
                     target, post_synaptic_population.label))
+
+        #MI SONO FERMATO QUI!!!!!!!
 
         if not isinstance(post_vertex,
                           AbstractAcceptsIncomingSynapses):
