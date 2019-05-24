@@ -37,7 +37,7 @@ class PyNNProjectionCommon(object):
             rng, machine_time_step, user_max_delay, label, time_scale_factor):
         # pylint: disable=too-many-arguments, too-many-locals
         self._spinnaker_control = spinnaker_control
-        self._projection_edge = None
+        self._projection_edges = list()
         self._host_based_synapse_list = None
         self._has_retrieved_synaptic_list_from_machine = False
         self._requires_mapping = True
@@ -50,26 +50,26 @@ class PyNNProjectionCommon(object):
         pre_vertex = pre_synaptic_population.get_neuron_vertex
 
         if post_synaptic_population.get_neuron_vertex.get_n_synapse_types > 1 and synapse_type == 0:
-            post_vertex = [post_synaptic_population.get_syn_vertices[synapse_type], post_synaptic_population.get_syn_vertices[synapse_type+1]]
+            post_vertices = [post_synaptic_population.get_syn_vertices[synapse_type], post_synaptic_population.get_syn_vertices[synapse_type+1]]
         else:
-            post_vertex = [post_synaptic_population.get_syn_vertices[synapse_type]]
+            post_vertices = [post_synaptic_population.get_syn_vertices[synapse_type]]
 
         if synapse_type is None:
             raise ConfigurationException(
                 "Synapse target {} not found in {}".format(
                     target, post_synaptic_population.label))
 
-        #MI SONO FERMATO QUI!!!!!!!
+        for post_vertex in post_vertices:
 
-        if not isinstance(post_vertex,
-                          AbstractAcceptsIncomingSynapses):
-            raise ConfigurationException(
-                "postsynaptic population is not designed to receive"
-                " synaptic projections")
+            if not isinstance(post_vertex,
+                              AbstractAcceptsIncomingSynapses):
+                raise ConfigurationException(
+                    "postsynaptic population is not designed to receive"
+                    " synaptic projections")
 
-        # set the plasticity dynamics for the post pop (allows plastic stuff
-        #  when needed)
-        post_vertex.set_synapse_dynamics(synapse_dynamics_stdp)
+            # set the plasticity dynamics for the post pop (allows plastic stuff
+            #  when needed)
+            post_vertex.set_synapse_dynamics(synapse_dynamics_stdp)
 
         # Set and store synapse information for future processing
         self._synapse_information = SynapseInformation(
@@ -87,8 +87,9 @@ class PyNNProjectionCommon(object):
         if max_delay is None:
             max_delay = user_max_delay
 
+        #NO NEED TO REPLICATE THIS SINCE THE TWO POST_VERTICES HAVE THE SAME DELAY
         # check if all delays requested can fit into the natively supported
-        # delays in the models (MODIFIED VERTEX HERE AS WELL)
+        # delays in the models
         post_vertex_max_supported_delay_ms = \
             post_vertex.get_maximum_delay_supported_in_ms(machine_time_step)
         if max_delay > (post_vertex_max_supported_delay_ms +
@@ -101,57 +102,59 @@ class PyNNProjectionCommon(object):
             logger.warning("The end user entered a max delay"
                            " for which the projection breaks")
 
-        # check that the projection edges label is not none, and give an
-        # auto generated label if set to None
-        if label is None:
-            label = "projection edge {}".format(
-                spinnaker_control.none_labelled_edge_count)
-            spinnaker_control.increment_none_labelled_edge_count()
+        for post_vertex in post_vertices:
+            # check that the projection edges label is not none, and give an
+            # auto generated label if set to None
+            if label is None:
+                edge_label = "projection edge {}".format(
+                    spinnaker_control.none_labelled_edge_count)
+                spinnaker_control.increment_none_labelled_edge_count()
 
-        # Find out if there is an existing edge between the populations
-        edge_to_merge = self._find_existing_edge(
-            pre_vertex,
-            post_vertex)
-        if edge_to_merge is not None:
-
-            # If there is an existing edge, add the connector
-            edge_to_merge.add_synapse_information(self._synapse_information)
-            self._projection_edge = edge_to_merge
-        else:
-
-            # If there isn't an existing edge, create a new one
-            self._projection_edge = ProjectionApplicationEdge(
+            # Find out if there is an existing edge between the two vertices
+            edge_to_merge = self._find_existing_edge(
                 pre_vertex,
-                post_vertex,
-                self._synapse_information, label=label)
+                post_vertex)
+            if edge_to_merge is not None:
 
-            # add edge to the graph
-            spinnaker_control.add_application_edge(
-                self._projection_edge, constants.SPIKE_PARTITION_ID)
+                # If there is an existing edge, add the connector
+                edge_to_merge.add_synapse_information(self._synapse_information)
+                projection_edge = edge_to_merge
+            else:
 
-        # If the delay exceeds the post vertex delay, add a delay extension
-        if max_delay > post_vertex_max_supported_delay_ms:
-            delay_edge = self._add_delay_extension(
-                pre_synaptic_population, post_synaptic_population, max_delay,
-                post_vertex_max_supported_delay_ms, machine_time_step,
-                time_scale_factor, synapse_type)
-            self._projection_edge.delay_edge = delay_edge
+                # If there isn't an existing edge, create a new one
+                projection_edge = ProjectionApplicationEdge(
+                    pre_vertex,
+                    post_vertex,
+                    self._synapse_information, label=edge_label)
+
+                # add edge to the graph
+                spinnaker_control.add_application_edge(
+                    projection_edge, constants.SPIKE_PARTITION_ID)
+
+            # If the delay exceeds the post vertex delay, add a delay extension
+            if max_delay > post_vertex_max_supported_delay_ms:
+                delay_edge = self._add_delay_extension(
+                    pre_synaptic_population, post_vertex, max_delay,
+                    post_vertex_max_supported_delay_ms, machine_time_step,
+                    time_scale_factor)
+                projection_edge.delay_edge = delay_edge
+
+            # If there is a virtual board, we need to hold the data in case the
+            # user asks for it
+            self._virtual_connection_list = None
+            if spinnaker_control.use_virtual_board:
+                self._virtual_connection_list = list()
+                connection_holder = ConnectionHolder(
+                    None, False, pre_vertex.n_atoms, post_vertex.n_atoms,
+                    self._virtual_connection_list)
+
+                post_vertex.add_pre_run_connection_holder(
+                    connection_holder, projection_edge,
+                    self._synapse_information)
+            self._projection_edges.append(projection_edge)
 
         # add projection to the SpiNNaker control system
         spinnaker_control.add_projection(self)
-
-        # If there is a virtual board, we need to hold the data in case the
-        # user asks for it
-        self._virtual_connection_list = None
-        if spinnaker_control.use_virtual_board:
-            self._virtual_connection_list = list()
-            connection_holder = ConnectionHolder(
-                None, False, pre_vertex.n_atoms, post_vertex.n_atoms,
-                self._virtual_connection_list)
-
-            post_vertex.add_pre_run_connection_holder(
-                connection_holder, self._projection_edge,
-                self._synapse_information)
 
     @property
     def requires_mapping(self):
@@ -185,9 +188,9 @@ class PyNNProjectionCommon(object):
         return None
 
     def _add_delay_extension(
-            self, pre_synaptic_population, post_synaptic_population,
+            self, pre_synaptic_population, post_vertex,
             max_delay_for_projection, max_delay_per_neuron, machine_time_step,
-            timescale_factor, synapse_type):
+            timescale_factor):
         """ Instantiate delay extension component
         """
         # pylint: disable=too-many-arguments
@@ -221,7 +224,6 @@ class PyNNProjectionCommon(object):
             delay_vertex.n_delay_stages = n_stages
 
         # Create the delay edge if there isn't one already (MODIFIED VERTEX HERE)
-        post_vertex = post_synaptic_population.get_syn_vertices[synapse_type]
         delay_edge = self._find_existing_edge(delay_vertex, post_vertex)
         if delay_edge is None:
             delay_edge = DelayedApplicationEdge(
@@ -238,13 +240,15 @@ class PyNNProjectionCommon(object):
             self, as_list, data_to_get, fixed_values=None, notify=None,
             handle_time_out_configuration=True):
         # pylint: disable=too-many-arguments
-        post_vertex = self._projection_edge.post_vertex
-        pre_vertex = self._projection_edge.pre_vertex
+        # THIS FUNCTION IS USED FOR RETRIEVING DATA THAT ARE COMMON FOR THE TWO PROJECTIONS (WEIGHTS, DELAYS)
+        # FOR THIS REASON THE HOLDER RELATED TO THE FIRST PROJECTION IS RETURNED ONLY
+        post_vertex = self._projection_edges[0].post_vertex
+        pre_vertex = self._projection_edges[0].pre_vertex
 
         # If in virtual board mode, the connection data should be set
         if self._virtual_connection_list is not None:
-            post_vertex = self._projection_edge.post_vertex
-            pre_vertex = self._projection_edge.pre_vertex
+            post_vertex = self._projection_edges[0].post_vertex
+            pre_vertex = self._projection_edges[0].pre_vertex
             connection_holder = ConnectionHolder(
                 data_to_get, as_list, pre_vertex.n_atoms, post_vertex.n_atoms,
                 self._virtual_connection_list, fixed_values=fixed_values,
@@ -262,7 +266,7 @@ class PyNNProjectionCommon(object):
         # and set up a callback for after run to fill in this connection holder
         if not self._spinnaker_control.has_ran:
             post_vertex.add_pre_run_connection_holder(
-                connection_holder, self._projection_edge,
+                connection_holder, self._projection_edges[0],
                 self._synapse_information)
             return connection_holder
 
@@ -292,7 +296,7 @@ class PyNNProjectionCommon(object):
             receivers = None
             extra_monitor_placements = None
 
-        edges = ctl.graph_mapper.get_machine_edges(self._projection_edge)
+        edges = ctl.graph_mapper.get_machine_edges(self._projection_edges[0])
         progress = ProgressBar(
             edges, "Getting {}s for projection between {} and {}".format(
                 data_to_get, pre_vertex.label, post_vertex.label))
@@ -326,12 +330,13 @@ class PyNNProjectionCommon(object):
         connection_holder.finish()
 
     def _clear_cache(self):
-        post_vertex = self._projection_edge.post_vertex
-        if isinstance(post_vertex, AbstractAcceptsIncomingSynapses):
-            post_vertex.clear_connection_cache()
+        for projection_edge in self._projection_edges:
+            post_vertex = projection_edge.post_vertex
+            if isinstance(post_vertex, AbstractAcceptsIncomingSynapses):
+                post_vertex.clear_connection_cache()
 
     def __repr__(self):
-        return "projection {}".format(self._projection_edge.label)
+        return "projection {}".format(self._projection_edges[0].label)
 
     def size(self, gather=True):
         """ Return the total number of connections.

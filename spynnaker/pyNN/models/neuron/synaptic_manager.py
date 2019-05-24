@@ -113,7 +113,8 @@ class SynapticManager(
         "_connected_app_vertices",
         "_model_synapse_types",
         "_atoms_neuron_cores",
-        "_synapse_recorder"]
+        "_synapse_recorder",
+        "_offset"]
 
     BASIC_MALLOC_USAGE = 2
 
@@ -124,7 +125,7 @@ class SynapticManager(
     def __init__(self, n_synapse_types, synapse_index, n_neurons, constraints, label,
                  max_atoms_per_core, weight_scale, ring_buffer_sigma,
                  spikes_per_second, incoming_spike_buffer_size, model_syn_types,
-                 population_table_type=None, synapse_io=None):
+                 offset, population_table_type=None, synapse_io=None):
 
         self._implemented_synapse_types = n_synapse_types
         self._ring_buffer_sigma = ring_buffer_sigma
@@ -135,6 +136,7 @@ class SynapticManager(
         self._connected_app_vertices = None
         self._model_synapse_types = model_syn_types
         self._atoms_neuron_cores = max_atoms_per_core
+        self._offset = offset
 
         #FOR RECORDING
         self._synapse_recorder = None
@@ -1087,8 +1089,9 @@ class SynapticManager(
         # Write the SDRAM tag for the contribution area
         spec.write_value(data=index)
 
-        #Write the index of the first neuron to compute the SDRAM offset
-        spec.write_value(data=(vertex_slice.lo_atom % self._atoms_neuron_cores))
+        # SDRAM offset, used for the second excitatory vertex
+        # (set to 0 or 2 to) improve the C code efficiency
+        spec.write_value(data=self._offset)
 
         ring_buffer_shifts = self._get_ring_buffer_shifts(
             self, application_graph, machine_time_step)

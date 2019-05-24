@@ -68,25 +68,25 @@ class AbstractPyNNNeuronModel(AbstractPyNNModel):
 
             if self._model.get_n_synapse_types > 1 and index == 0:
                 vertices.append(SynapticManager(1, index, n_neurons, syn_constraints,
-                                                label + "even_syn_vertex_" + str(index), max_atoms,
+                                                label + "_even_syn_vertex_" + str(index), max_atoms,
                                                 self._model.get_global_weight_scale(),
                                                 ring_buffer_sigma, spikes_per_second,
                                                 incoming_spike_buffer_size,
-                                                self._model.get_n_synapse_types()))
+                                                self._model.get_n_synapse_types(), 0))
 
                 vertices.append(SynapticManager(1, index, n_neurons, syn_constraints,
-                                                label+"odd_syn_vertex_"+str(index), max_atoms,
+                                                label+"_odd_syn_vertex_"+str(index), max_atoms,
                                                 self._model.get_global_weight_scale(),
                                                 ring_buffer_sigma, spikes_per_second,
                                                 incoming_spike_buffer_size,
-                                                self._model.get_n_synapse_types()))
+                                                self._model.get_n_synapse_types(), 2))
             else:
                 vertices.append(SynapticManager(1, index, n_neurons, syn_constraints,
-                                                label + "syn_vertex_" + str(index), max_atoms,
+                                                label + "_syn_vertex_" + str(index), max_atoms,
                                                 self._model.get_global_weight_scale(),
                                                 ring_buffer_sigma, spikes_per_second,
                                                 incoming_spike_buffer_size,
-                                                self._model.get_n_synapse_types()))
+                                                self._model.get_n_synapse_types(), 0))
 
         vertices[0].connected_app_vertices = vertices[1:]
         for i in range(1, len(vertices)):

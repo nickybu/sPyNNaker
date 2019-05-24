@@ -20,6 +20,7 @@ extern uint ticks;
 
 #define SPIKE_RECORDING_CHANNEL 0
 #define DMA_TAG_READ_SYNAPTIC_CONTRIBUTION 1
+#define SAT_CONST 0xFFFF
 
 //! how many bits the synapse delay will take
 #ifndef SYNAPSE_DELAY_BITS
@@ -271,6 +272,13 @@ bool neuron_do_timestep_update(
 
             uint32_t buff_index = ((synapse_type_index << synapse_index_bits) | neuron_index);
 
+            if((!synapse_type_index) &&
+                ((synaptic_contributions[buff_index] +
+                            (synaptic_contributions[buff_index + (n_neurons << 1)] & ~synapse_type_index)) & 0x10000)) {
+                //CHECK THAT THE VALUE OF SAT_CONST IS CORRECTLY TAKEN
+                synaptic_contributions[buff_index] = SAT_CONST;
+            }
+
             neuron_impl_add_inputs(
                 synapse_type_index,
                 neuron_index,
@@ -427,6 +435,9 @@ bool neuron_initialise(address_t address, uint32_t *timer_offset) {
     uint32_t contribution_bits =
         log_n_neurons + log_n_synapse_types;
     uint32_t contribution_size = 1 << (contribution_bits);
+
+    //Add the space for further excitatory syn cores
+    contribution_size += n_neurons;
 
     dma_size = contribution_size * sizeof(weight_t);
 
